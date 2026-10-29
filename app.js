@@ -6,6 +6,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyBFc3CjKTWr8XJKW94EP2QlcwGS-BNQXjk",
   authDomain: "winds-51d1b.firebaseapp.com",
+  databaseURL: "https://winds-51d1b-default-rtdb.asia-southeast1.firebasedatabase.app/"
   projectId: "winds-51d1b",
   storageBucket: "winds-51d1b.firebasestorage.app",
   messagingSenderId: "674754333013",
