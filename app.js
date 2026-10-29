@@ -3,14 +3,14 @@
    ============================================================ */
 
 /* ---------- FIREBASE CONFIG — paste yours from Firebase Console ---------- */
-const FIREBASE_CONFIG = {
+const firebaseConfig = {
   apiKey: "AIzaSyBFc3CjKTWr8XJKW94EP2QlcwGS-BNQXjk",
   authDomain: "winds-51d1b.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
   projectId: "winds-51d1b",
   storageBucket: "winds-51d1b.firebasestorage.app",
   messagingSenderId: "674754333013",
-  appId: "1:674754333013:web:f1e35da432d9900d90c7dc"
+  appId: "1:674754333013:web:f1e35da432d9900d90c7dc",
+  measurementId: "G-RT2SBWGES1"
 };
 /* ----------------------------------------------------------------------- */
 
