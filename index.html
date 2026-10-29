@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blessed Winds — Play, Earn & Soar</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Floating particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="#home" class="logo">
+        <span class="logo-icon">🍃</span>
+        <span class="logo-text">Blessed <span>Winds</span></span>
+      </a>
+      <nav class="nav" id="nav">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#games" class="nav-link">Games</a>
+        <a href="#online" class="nav-link">Online</a>
+        <a href="#shop" class="nav-link">Shop</a>
+        <a href="#profile" class="nav-link">Profile</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+      </nav>
+      <div class="header-right">
+        <button class="sound-btn" id="soundBtn" title="Toggle sound">🔊</button>
+        <div class="winds-badge" id="windsBadge">
+          <span class="winds-icon">🍃</span>
+          <span id="windsCount">0</span>
+        </div>
+        <button class="btn btn-ghost" id="authBtn">Login</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section id="home" class="section hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <p class="eyebrow">✦ Welcome to the realm of winds</p>
+          <h1>Feel the <span class="gradient-text">Blessed Winds</span></h1>
+          <p class="hero-desc">
+            Play mini-games, challenge friends online, earn Winds, level up your profile,
+            and unlock exclusive rewards in the shop. Soft winds, big fun.
+          </p>
+          <div class="hero-actions">
+            <a href="#games" class="btn btn-primary">Play Games</a>
+            <a href="#online" class="btn btn-secondary">Go Online</a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat">
+              <strong id="statPlayers">1.2k+</strong>
+              <span>Online now</span>
+            </div>
+            <div class="stat">
+              <strong id="statGames">8</strong>
+              <span>Games</span>
+            </div>
+            <div class="stat">
+              <strong id="statWinds">∞</strong>
+              <span>Winds to earn</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="wind-orb">
+            <div class="orb-core"></div>
+            <div class="orb-ring"></div>
+            <div class="orb-ring ring-2"></div>
+            <div class="orb-particles"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOCAL GAMES -->
+    <section id="games" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Solo Games</h2>
+          <p>Play anytime. Earn Winds with every win.</p>
+        </div>
+        <div class="games-grid" id="gamesGrid">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ONLINE -->
+    <section id="online" class="section online-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Online Play</h2>
+          <p>Match with players worldwide. Real-time rooms & leaderboards.</p>
+        </div>
+
+        <div class="online-layout">
+          <!-- Left: Lobby -->
+          <div class="lobby-panel">
+            <div class="panel-header">
+              <h3>Lobby</h3>
+              <button class="btn btn-sm btn-primary" id="createRoomBtn">+ Create Room</button>
+            </div>
+            <div class="room-filters">
+              <button class="chip active" data-filter="all">All</button>
+              <button class="chip" data-filter="open">Open</button>
+              <button class="chip" data-filter="racing">Racing</button>
+              <button class="chip" data-filter="duel">Duel</button>
+            </div>
+            <div class="rooms-list" id="roomsList">
+              <!-- rooms -->
+            </div>
+          </div>
+
+          <!-- Right: Active room / matchmaking -->
+          <div class="match-panel" id="matchPanel">
+            <div class="match-empty" id="matchEmpty">
+              <div class="empty-icon">🌬️</div>
+              <h3>No active room</h3>
+              <p>Create a room or join one from the lobby to play with others.</p>
+            </div>
+            <div class="match-active hidden" id="matchActive">
+              <div class="match-header">
+                <div>
+                  <h3 id="roomName">Room</h3>
+                  <span class="room-meta" id="roomMeta">0/4 players · Open</span>
+                </div>
+                <button class="btn btn-sm btn-ghost" id="leaveRoomBtn">Leave</button>
+              </div>
+              <div class="players-row" id="playersRow"></div>
+              <div class="match-status" id="matchStatus">Waiting for players…</div>
+              <div class="match-game-area" id="matchGameArea">
+                <!-- game UI injected here -->
+              </div>
+              <div class="match-chat" id="matchChat">
+                <div class="chat-messages" id="chatMessages"></div>
+                <form class="chat-form" id="chatForm">
+                  <input type="text" id="chatInput" placeholder="Say something…" maxlength="80" autocomplete="off" />
+                  <button type="submit" class="btn btn-sm btn-primary">Send</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOP -->
+    <section id="shop" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Shop</h2>
+          <p>Spend your hard-earned Winds on boosts, skins & packs.</p>
+        </div>
+        <div class="shop-filters">
+          <button class="chip active" data-shop="all">All</button>
+          <button class="chip" data-shop="boosts">Boosts</button>
+          <button class="chip" data-shop="cosmetics">Cosmetics</button>
+          <button class="chip" data-shop="packs">Packs</button>
+        </div>
+        <div class="shop-grid" id="shopGrid"></div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="profile" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Profile</h2>
+          <p>Your journey with the winds.</p>
+        </div>
+        <div class="profile-card" id="profileCard">
+          <div class="profile-guest" id="profileGuest">
+            <div class="guest-avatar">👤</div>
+            <h3>Not logged in</h3>
+            <p>Login or create an account to save progress, earn badges, and play online.</p>
+            <button class="btn btn-primary" id="profileLoginBtn">Login / Sign up</button>
+          </div>
+          <div class="profile-logged hidden" id="profileLogged">
+            <div class="profile-top">
+              <div class="avatar-wrap">
+                <div class="avatar" id="userAvatar">🍃</div>
+                <button class="avatar-edit" id="avatarEdit" title="Change avatar">✎</button>
+              </div>
+              <div class="profile-info">
+                <h3 id="userName">Player</h3>
+                <p class="user-title" id="userTitle">Wind Novice</p>
+                <div class="level-bar-wrap">
+                  <div class="level-label">
+                    <span>Level <strong id="userLevel">1</strong></span>
+                    <span id="xpText">0 / 100 XP</span>
+                  </div>
+                  <div class="level-bar">
+                    <div class="level-fill" id="xpBar"></div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-secondary" id="dailyClaimBtn">
+                Claim Daily +50 🍃
+              </button>
+            </div>
+            <div class="profile-stats">
+              <div class="p-stat"><strong id="pGames">0</strong><span>Games played</span></div>
+              <div class="p-stat"><strong id="pWins">0</strong><span>Wins</span></div>
+              <div class="p-stat"><strong id="pOnline">0</strong><span>Online matches</span></div>
+              <div class="p-stat"><strong id="pWinds">0</strong><span>Total Winds</span></div>
+            </div>
+            <div class="badges-section">
+              <h4>Badges</h4>
+              <div class="badges" id="badgesList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>FAQ</h2>
+          <p>Everything you need to know about Blessed Winds.</p>
+        </div>
+        <div class="faq-list" id="faqList"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="logo-icon">🍃</span> Blessed Winds
+      </div>
+      <p>Made with soft winds & pure fun. Progress saved locally.</p>
+      <p class="footer-note">© 2026 Blessed Winds · Demo experience</p>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Login Modal -->
+  <div class="modal-overlay hidden" id="authModal">
+    <div class="modal">
+      <button class="modal-close" id="authClose">×</button>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Login</button>
+        <button class="auth-tab" data-tab="signup">Sign up</button>
+      </div>
+      <form id="loginForm" class="auth-form">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="loginUser" placeholder="yourname" required minlength="3" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPass" placeholder="••••••••" required minlength="4" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+        <p class="auth-hint">Demo: any username + password (min 4 chars)</p>
+      </form>
+      <form id="signupForm" class="auth-form hidden">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="signupUser" placeholder="choose a name" required minlength="3" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="signupPass" placeholder="••••••••" required minlength="4" />
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="signupPass2" placeholder="••••••••" required minlength="4" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+        <p class="auth-hint">Accounts are stored only in your browser.</p>
+      </form>
+      <div class="auth-divider"><span>or</span></div>
+      <button class="btn btn-secondary btn-block" id="guestBtn">Continue as Guest</button>
+    </div>
+  </div>
+
+  <!-- Game Modal (solo) -->
+  <div class="modal-overlay hidden" id="gameModal">
+    <div class="modal modal-game">
+      <button class="modal-close" id="gameClose">×</button>
+      <h2 id="gameTitle">Game</h2>
+      <div id="gameContent"></div>
+    </div>
+  </div>
+
+  <!-- Create Room Modal -->
+  <div class="modal-overlay hidden" id="createRoomModal">
+    <div class="modal">
+      <button class="modal-close" id="createRoomClose">×</button>
+      <h2>Create Room</h2>
+      <form id="createRoomForm">
+        <div class="form-group">
+          <label>Room name</label>
+          <input type="text" id="newRoomName" placeholder="My Wind Room" required maxlength="24" />
+        </div>
+        <div class="form-group">
+          <label>Game mode</label>
+          <select id="newRoomMode">
+            <option value="racing">Wind Race</option>
+            <option value="duel">Gust Duel</option>
+            <option value="memory">Memory Match</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Max players</label>
+          <select id="newRoomMax">
+            <option value="2">2</option>
+            <option value="4" selected>4</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Create & Join</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
