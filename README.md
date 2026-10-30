@@ -4,6 +4,24 @@ A playable Next.js (App Router) website with a PostgreSQL database, Drizzle ORM,
 
 **Read the illustrated guide inside the website at `/guide`.**
 
+## Live site
+
+**https://blessed-winds.vercel.app** — deployed on Vercel, with the database hosted on Supabase.
+
+| Piece | Where |
+| --- | --- |
+| App | Vercel project `blessed-winds` (Next.js preset, builds `npm run build`) |
+| Database | Supabase project `blessed-winds`, region `ap-south-1` (Mumbai), project ref `scqowcfqyqfzextcmmgh` |
+| Connection | `DATABASE_URL` environment variable in Vercel → Supabase connection pooler (`...pooler.supabase.com:6543`) |
+| Health check | https://blessed-winds.vercel.app/api/health returns `{"ok":true}` when the database answers |
+
+Notes for deployed environments:
+
+- Use the Supavisor **pooler** host (`aws-0-<region>.pooler.supabase.com:6543`), not the direct `db.<ref>.supabase.co` host: the direct host is IPv6-only and Vercel functions have no IPv6 egress.
+- Serverless runtimes don't ship Supabase's CA, so the URL ends with `?sslmode=no-verify`. The connection is still encrypted; only certificate verification is skipped.
+- Apply schema changes with `npx drizzle-kit generate` and run the produced SQL in the Supabase SQL editor. `drizzle/0000_init_blessed_winds.sql` is the current schema.
+- The demo data (shop items, quests, the demo player and eight rival players) seeds itself on the first request to any API route.
+
 ## Run it locally
 
 You need **Node.js 20.9+** and a running **PostgreSQL** database.
