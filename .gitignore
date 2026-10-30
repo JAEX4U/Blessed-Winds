@@ -1,0 +1,19 @@
+# Private configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Local files
+.DS_Store
+*.log
+.vercel/
+
+# Next.js generated types
+next-env.d.ts
