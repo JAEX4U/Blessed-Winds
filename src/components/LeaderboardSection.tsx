@@ -230,7 +230,7 @@ export default function LeaderboardSection() {
       )}
 
       {/* Board tabs */}
-      <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 w-fit">
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 overflow-x-auto scrollbar-none">
         {boards.map((b) => {
           const Icon = b.icon;
           return (

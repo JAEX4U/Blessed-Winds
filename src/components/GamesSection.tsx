@@ -40,7 +40,7 @@ export default function GamesSection() {
         </div>
 
         {/* Game Tabs */}
-        <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800">
+        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setSelectedGame("spin")}
             className={`relative px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
@@ -264,7 +264,7 @@ function WheelOfGales() {
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/60 p-8 rounded-3xl border border-cyan-500/20">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-4 lg:p-8 rounded-3xl border border-cyan-500/20 bg-slate-900/60">
       {/* Wheel Visual Canvas */}
       <div className="lg:col-span-7 flex flex-col items-center justify-center relative">
         {/* Top Pointer */}
@@ -273,7 +273,7 @@ function WheelOfGales() {
         </div>
 
         {/* Circular Wheel */}
-        <div className="relative w-72 h-72 sm:w-96 sm:h-96 rounded-full p-2 bg-gradient-to-tr from-cyan-500 via-sky-400 to-emerald-400 shadow-2xl shadow-cyan-500/30">
+        <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-72 lg:h-72 rounded-full p-2 bg-gradient-to-tr from-cyan-500 via-sky-400 to-emerald-400 shadow-2xl shadow-cyan-500/30">
           <div
             className="w-full h-full rounded-full bg-slate-950 relative overflow-hidden transition-transform duration-[3500ms] cubic-bezier(0.15, 0.9, 0.2, 1)"
             style={{ transform: `rotate(${wheelRotation}deg)` }}
@@ -292,7 +292,7 @@ function WheelOfGales() {
                     className={`w-full h-full bg-gradient-to-br ${seg.color} border border-cyan-400/20 flex items-start justify-center pt-2`}
                   >
                     <span
-                      className="text-xs sm:text-sm font-black text-white drop-shadow transform -skew-y-[-45deg]"
+                      className="text-[10px] sm:text-xs font-black text-white drop-shadow transform -skew-y-[-45deg] leading-none"
                       style={{ transform: "rotate(22.5deg)" }}
                     >
                       {seg.label}
@@ -303,8 +303,8 @@ function WheelOfGales() {
             })}
 
             {/* Wheel Center Cap */}
-            <div className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-slate-900 border-4 border-cyan-400 flex items-center justify-center shadow-inner">
-              <Wind className="w-7 h-7 text-cyan-300 animate-spin" style={{ animationDuration: "6s" }} />
+            <div className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-slate-900 border-4 border-cyan-400 flex items-center justify-center shadow-inner">
+              <Wind className="w-6 h-6 text-cyan-300 animate-spin" style={{ animationDuration: "6s" }} />
             </div>
           </div>
         </div>
@@ -321,7 +321,7 @@ function WheelOfGales() {
       </div>
 
       {/* Control Panel */}
-      <div className="lg:col-span-5 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-5 bg-slate-950/80 p-4 lg:p-6 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Disc className="w-5 h-5 text-cyan-400" />
@@ -531,9 +531,9 @@ function CycloneRush() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/60 p-8 rounded-3xl border border-cyan-500/20">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-4 lg:p-8 rounded-3xl border border-cyan-500/20 bg-slate-900/60">
       {/* Cyclone Visual Display */}
-      <div className="lg:col-span-8 flex flex-col items-center justify-center p-8 bg-slate-950/90 rounded-2xl border border-slate-800 relative overflow-hidden min-h-[360px]">
+      <div className="lg:col-span-8 flex flex-col items-center justify-center p-4 lg:p-8 bg-slate-950/90 rounded-2xl border border-slate-800 relative overflow-hidden min-h-[280px] sm:min-h-[360px]">
         {/* Dynamic Storm Aura Background */}
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
@@ -620,7 +620,7 @@ function CycloneRush() {
       </div>
 
       {/* Crash Bet Panel */}
-      <div className="lg:col-span-4 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-4 bg-slate-950/80 p-4 lg:p-6 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-cyan-400" />
@@ -754,9 +754,9 @@ function TempestSlots() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/60 p-8 rounded-3xl border border-cyan-500/20">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-4 lg:p-8 rounded-3xl border border-cyan-500/20 bg-slate-900/60">
       {/* Slots Machine Display */}
-      <div className="lg:col-span-8 flex flex-col items-center justify-center p-8 bg-slate-950/90 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-8 flex flex-col items-center justify-center p-4 lg:p-8 bg-slate-950/90 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
           <Sparkles className="w-4 h-4" />
           <span>Three-Reel Blessed Winds Matrix</span>
@@ -796,7 +796,7 @@ function TempestSlots() {
       </div>
 
       {/* Control Panel */}
-      <div className="lg:col-span-4 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-4 bg-slate-950/80 p-4 lg:p-6 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-400" />
@@ -940,7 +940,7 @@ function ZephyrHarvester() {
       </div>
 
       {/* Control Panel */}
-      <div className="lg:col-span-4 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-4 bg-slate-950/80 p-4 lg:p-6 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Zap className="w-5 h-5 text-emerald-400" />

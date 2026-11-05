@@ -263,9 +263,9 @@ export default function LiveSpinGame() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         {/* ============ WHEEL ============ */}
-        <div className="lg:col-span-5 flex flex-col items-center p-6 rounded-3xl bg-slate-900/60 border border-cyan-500/20">
+        <div className="lg:col-span-5 flex flex-col items-center p-4 lg:p-6 rounded-3xl bg-slate-900/60 border border-cyan-500/20">
           <div className="w-full mb-4">
             <div className="flex items-center justify-between text-xs font-bold mb-1.5">
               <span className="text-slate-400 flex items-center gap-1.5">
@@ -297,7 +297,7 @@ export default function LiveSpinGame() {
 
           <div className="z-20 -mb-4 w-0 h-0 border-l-[13px] border-l-transparent border-r-[13px] border-r-transparent border-t-[24px] border-t-amber-400 drop-shadow-lg" />
 
-          <div className="relative w-full max-w-[340px] aspect-square">
+          <div className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-square mx-auto">
             <svg viewBox="0 0 320 320" className="w-full h-full drop-shadow-2xl" style={{ transform: `rotate(${rotation}deg)`, transition: spinTransition }}>
               <circle cx="160" cy="160" r="158" fill="#020617" />
               <circle cx="160" cy="160" r="155" fill="none" stroke="#22d3ee" strokeOpacity="0.5" strokeWidth="3" />
@@ -415,7 +415,7 @@ export default function LiveSpinGame() {
         </div>
 
         {/* ============ BET PANEL ============ */}
-        <div className="lg:col-span-4 p-6 rounded-3xl bg-slate-950/80 border border-slate-800 space-y-5">
+        <div className="lg:col-span-4 p-4 rounded-3xl bg-slate-950/80 border border-slate-800 space-y-5">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Trophy className="w-5 h-5 text-amber-400" />
@@ -535,7 +535,7 @@ export default function LiveSpinGame() {
         </div>
 
         {/* ============ RIDERS ============ */}
-        <div className="lg:col-span-3 p-5 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4">
+        <div className="lg:col-span-3 p-4 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Users className="w-4 h-4 text-cyan-400" /> Riders & Splits
           </h3>

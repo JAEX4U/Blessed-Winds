@@ -141,7 +141,14 @@
       radial-gradient(60rem 40rem at 12% -10%, rgb(8 145 178 / 0.18), transparent 60%),
       radial-gradient(48rem 34rem at 92% 4%, rgb(16 185 129 / 0.12), transparent 62%),
       radial-gradient(52rem 40rem at 50% 108%, rgb(56 189 248 / 0.1), transparent 60%);
+    /* fixed backgrounds cause paint jank on mobile Safari; scroll is smoother */
     background-attachment: fixed;
+  }
+
+  @media (max-width: 1023px) {
+    body {
+      background-attachment: scroll;
+    }
   }
 
   ::selection {

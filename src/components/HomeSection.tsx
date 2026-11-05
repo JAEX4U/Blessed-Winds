@@ -64,7 +64,7 @@ export default function HomeSection() {
               <span>Sanctuary of the Four Gales</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
               Harness the Power of{" "}
               <span className="text-gradient underline decoration-cyan-400/30">
                 Blessed Winds
@@ -193,7 +193,7 @@ export default function HomeSection() {
       <HomeHighlights />
 
       {/* Featured Feature Cards */}
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
         <div
           onClick={() => setActiveTab("games")}
           className="card-lift cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-cyan-500/50 hover:bg-slate-900/90"
@@ -264,7 +264,7 @@ export default function HomeSection() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
           <div className="card-lift rounded-xl border border-emerald-500/20 bg-slate-900/80 p-4 space-y-2">
             <div className="text-2xl">🌱 Zephyrus (West)</div>
             <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider">The Gentle Spring</div>
