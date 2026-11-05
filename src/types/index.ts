@@ -14,6 +14,9 @@ export interface UserData {
   equippedAura: string;
   lastDailyClaim: string | null;
   streakDays: number;
+  wheelFreeSpinsUsed: number;
+  wheelPaidSpinsUsed: number;
+  wheelSpinsDate: string | null;
   createdAt: string;
   updatedAt: string;
 }

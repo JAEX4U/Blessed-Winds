@@ -16,6 +16,9 @@ export const users = pgTable("users", {
   equippedAura: text("equipped_aura").default("emerald_breeze"),
   lastDailyClaim: timestamp("last_daily_claim"),
   streakDays: integer("streak_days").notNull().default(1),
+  wheelFreeSpinsUsed: integer("wheel_free_spins_used").notNull().default(0),
+  wheelPaidSpinsUsed: integer("wheel_paid_spins_used").notNull().default(0),
+  wheelSpinsDate: timestamp("wheel_spins_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
