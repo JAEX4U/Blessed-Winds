@@ -121,27 +121,59 @@ export default function GamesSection() {
    ========================================================================= */
 function WheelOfGales() {
   const { user, refreshUser } = useUser();
-  const [bet, setBet] = useState(50);
+  const [spinMode, setSpinMode] = useState<"free" | "paid">("free");
   const [isSpinning, setIsSpinning] = useState(false);
   const [wheelRotation, setWheelRotation] = useState(0);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
   const [lastWin, setLastWin] = useState<number | null>(null);
+  const [freeSpinsRemaining, setFreeSpinsRemaining] = useState(5);
+  const [paidSpinsRemaining, setPaidSpinsRemaining] = useState(5);
 
-  const segments = [
-    { label: "0x", color: "from-slate-700 to-slate-800", text: "Calm Breeze (0x)", mult: 0 },
-    { label: "0.5x", color: "from-sky-700 to-sky-900", text: "Gentle Zephyr (0.5x)", mult: 0.5 },
-    { label: "1.2x", color: "from-teal-600 to-teal-800", text: "Brisk Draft (1.2x)", mult: 1.2 },
-    { label: "1.5x", color: "from-emerald-600 to-emerald-800", text: "Gale Gust (1.5x)", mult: 1.5 },
-    { label: "2.0x", color: "from-cyan-600 to-blue-800", text: "Turbulent Storm (2x)", mult: 2.0 },
-    { label: "3.0x", color: "from-indigo-600 to-indigo-900", text: "Tempest Surge (3x)", mult: 3.0 },
-    { label: "5.0x", color: "from-purple-600 to-purple-900", text: "Typhoon Blessing (5x)", mult: 5.0 },
-    { label: "10x", color: "from-amber-500 to-yellow-600", text: "BLESSED HURRICANE (10x)!", mult: 10.0 },
+  const PAID_SPIN_COST = 150;
+  const MAX_FREE_SPINS = 5;
+  const MAX_PAID_SPINS = 5;
+
+  const freeSegments = [
+    { payout: 0, label: "0", color: "from-slate-700 to-slate-800", text: "Calm Breeze (0)", weight: 30 },
+    { payout: 50, label: "50", color: "from-sky-700 to-sky-900", text: "Gentle Breeze (50)", weight: 25 },
+    { payout: 100, label: "100", color: "from-teal-600 to-teal-800", text: "Brisk Draft (100)", weight: 20 },
+    { payout: 200, label: "200", color: "from-emerald-600 to-emerald-800", text: "Gale Gust (200)", weight: 15 },
+    { payout: 500, label: "500", color: "from-cyan-600 to-blue-800", text: "Storm Surge (500)", weight: 7 },
+    { payout: 800, label: "800", color: "from-purple-600 to-purple-900", text: "Typhoon Blessing (800)", weight: 2 },
+    { payout: 3000, label: "3000", color: "from-amber-500 to-yellow-600", text: "BLESSED HURRICANE (3000)!", weight: 1 },
   ];
+
+  const paidSegments = [
+    { payout: 0, label: "0", color: "from-slate-700 to-slate-800", text: "Calm Breeze (0)", weight: 15 },
+    { payout: 50, label: "50", color: "from-sky-700 to-sky-900", text: "Gentle Breeze (50)", weight: 20 },
+    { payout: 100, label: "100", color: "from-teal-600 to-teal-800", text: "Brisk Draft (100)", weight: 22 },
+    { payout: 200, label: "200", color: "from-emerald-600 to-emerald-800", text: "Gale Gust (200)", weight: 18 },
+    { payout: 500, label: "500", color: "from-cyan-600 to-blue-800", text: "Storm Surge (500)", weight: 12 },
+    { payout: 800, label: "800", color: "from-purple-600 to-purple-900", text: "Typhoon Blessing (800)", weight: 8 },
+    { payout: 3000, label: "3000", color: "from-amber-500 to-yellow-600", text: "BLESSED HURRICANE (3000)!", weight: 5 },
+  ];
+
+  const segments = spinMode === "paid" ? paidSegments : freeSegments;
+  const segmentCount = segments.length;
+  const segmentAngle = 360 / segmentCount;
 
   const handleSpin = async () => {
     if (isSpinning) return;
-    if ((user?.windBalance ?? 0) < bet) {
-      setResultMessage("Not enough Winds balance for this bet!");
+
+    const cost = spinMode === "paid" ? PAID_SPIN_COST : 0;
+    const remaining = spinMode === "paid" ? paidSpinsRemaining : freeSpinsRemaining;
+
+    if (remaining <= 0) {
+      setResultMessage(
+        spinMode === "paid"
+          ? "No paid spins left today. Try again tomorrow!"
+          : "No free spins left today. Buy a paid spin or come back tomorrow!"
+      );
+      return;
+    }
+
+    if (spinMode === "paid" && (user?.windBalance ?? 0) < cost) {
+      setResultMessage("Not enough Winds balance for a paid spin!");
       return;
     }
 
@@ -152,7 +184,7 @@ function WheelOfGales() {
       const res = await fetch("/api/games", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameType: "wheel", bet }),
+        body: JSON.stringify({ gameType: "wheel", bet: cost, isPaid: spinMode === "paid" }),
       });
       const data = await res.json();
 
@@ -163,10 +195,12 @@ function WheelOfGales() {
       }
 
       const segmentIndex = data.extra?.segmentIndex ?? 0;
-      const segmentAngle = 360 / segments.length; // 45 deg
       // Target angle so top pointer hits segmentIndex
       const randomFullSpins = 5 + Math.floor(Math.random() * 3);
-      const targetDeg = wheelRotation + randomFullSpins * 360 + (360 - segmentIndex * segmentAngle - segmentAngle / 2);
+      const targetDeg =
+        wheelRotation +
+        randomFullSpins * 360 +
+        (360 - segmentIndex * segmentAngle - segmentAngle / 2);
 
       setWheelRotation(targetDeg);
 
@@ -174,8 +208,13 @@ function WheelOfGales() {
         setIsSpinning(false);
         setResultMessage(data.message);
         setLastWin(data.payout);
+        // Update remaining spin counts from server response
+        setFreeSpinsRemaining(data.extra?.freeSpinsRemaining ?? 0);
+        setPaidSpinsRemaining(data.extra?.paidSpinsRemaining ?? 0);
         await refreshUser();
-        if (data.payout > bet) {
+
+        const netWin = data.payout - cost;
+        if (netWin > 0) {
           confetti({
             particleCount: 70,
             spread: 60,
@@ -189,6 +228,40 @@ function WheelOfGales() {
       setResultMessage("Spin network error.");
     }
   };
+
+  const noSpinsLeft = freeSpinsRemaining <= 0 && paidSpinsRemaining <= 0;
+
+  // Result badge styling
+  const resultBadgeClass = (() => {
+    if (!lastWin) return "bg-rose-500/20 text-rose-300 border border-rose-500/30";
+    const cost = spinMode === "paid" ? PAID_SPIN_COST : 0;
+    return lastWin > cost
+      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+      : "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30";
+  })();
+
+  const spinButtonLabel = isSpinning
+    ? "Spinning Gales..."
+    : spinMode === "free"
+    ? "Free Spin"
+    : `Paid Spin (${PAID_SPIN_COST} WND)`;
+
+  const bottomContent = noSpinsLeft ? (
+    <div className="p-3 rounded-xl bg-rose-900/20 border border-rose-500/30 text-center">
+      <p className="text-xs text-rose-400 font-medium">
+        All spins used today — come back tomorrow!
+      </p>
+    </div>
+  ) : (
+    <button
+      onClick={handleSpin}
+      disabled={isSpinning}
+      className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-black text-base shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-emerald-400 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+    >
+      <RotateCcw className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`} />
+      <span>{spinButtonLabel}</span>
+    </button>
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/60 p-8 rounded-3xl border border-cyan-500/20">
@@ -206,7 +279,7 @@ function WheelOfGales() {
             style={{ transform: `rotate(${wheelRotation}deg)` }}
           >
             {segments.map((seg, i) => {
-              const rotation = (360 / segments.length) * i;
+              const rotation = (360 / segmentCount) * i;
               return (
                 <div
                   key={i}
@@ -239,13 +312,7 @@ function WheelOfGales() {
         {resultMessage && (
           <div className="mt-6 text-center">
             <span
-              className={`inline-block px-4 py-2 rounded-xl text-sm font-bold ${
-                (lastWin ?? 0) > bet
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                  : (lastWin ?? 0) === 0
-                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                  : "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-              }`}
+              className={`inline-block px-4 py-2 rounded-xl text-sm font-bold ${resultBadgeClass}`}
             >
               {resultMessage}
             </span>
@@ -261,81 +328,101 @@ function WheelOfGales() {
             Wheel of Gales
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Spin the celestial compass. Land on up to 10x Blessed Hurricane multiplier!
+            Spin the celestial compass. Fixed payouts: 50, 100, 200, 500, 800, 3000 Winds.
           </p>
         </div>
 
-        {/* Bet Amount Selector */}
-        <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-300 flex justify-between">
-            <span>Wager Amount (Winds)</span>
-            <span className="text-cyan-400 font-bold">Balance: {(user?.windBalance ?? 0).toLocaleString()}</span>
-          </label>
-          <div className="grid grid-cols-4 gap-2">
-            {[20, 50, 100, 250].map((amt) => (
-              <button
-                key={amt}
-                onClick={() => setBet(amt)}
-                className={`py-2 rounded-xl text-xs font-bold border transition-all ${
-                  bet === amt
-                    ? "bg-cyan-500/20 border-cyan-400 text-cyan-300"
-                    : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
-                }`}
-              >
-                {amt} WND
-              </button>
-            ))}
+        {/* Daily spin counters */}
+        <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800/50">
+          <div className="p-3 rounded-lg bg-slate-950 border border-slate-800/50">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Free Spins Today
+            </div>
+            <div className="text-xl font-black text-cyan-400">
+              {freeSpinsRemaining}
+            </div>
+            <div className="text-[10px] text-slate-500">/ {MAX_FREE_SPINS}</div>
           </div>
-          <div className="flex items-center space-x-2 pt-2">
-            <input
-              type="number"
-              min={20}
-              max={user?.windBalance || 5000}
-              value={bet}
-              onChange={(e) => setBet(Math.max(20, parseInt(e.target.value) || 20))}
-              className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-white font-bold text-sm focus:outline-none focus:border-cyan-400"
-            />
-            <button
-              onClick={() => setBet(Math.floor((user?.windBalance ?? 100) / 2))}
-              className="px-3 py-2 bg-slate-800 rounded-xl text-xs font-bold text-slate-300 hover:text-white"
-            >
-              1/2
-            </button>
-            <button
-              onClick={() => setBet(user?.windBalance ?? 100)}
-              className="px-3 py-2 bg-slate-800 rounded-xl text-xs font-bold text-amber-400 hover:text-amber-300"
-            >
-              MAX
-            </button>
+          <div className="p-3 rounded-lg bg-slate-950 border border-slate-800/50">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Paid Spins Today
+            </div>
+            <div className="text-xl font-black text-amber-400">
+              {paidSpinsRemaining}
+            </div>
+            <div className="text-[10px] text-slate-500">/ {MAX_PAID_SPINS}</div>
           </div>
         </div>
 
-        {/* Multiplier Paytable info */}
+        {/* Spin mode selector */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setSpinMode("free")}
+            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+              spinMode === "free"
+                ? "bg-cyan-500/20 border border-cyan-400/50 text-cyan-300"
+                : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            Free
+          </button>
+          <button
+            onClick={() => setSpinMode("paid")}
+            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+              spinMode === "paid"
+                ? "bg-amber-500/20 border border-amber-500/50 text-amber-300"
+                : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            Paid ({PAID_SPIN_COST} WND)
+          </button>
+        </div>
+
+        {/* Balance info */}
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-slate-300 flex justify-between">
+            <span>Winds Balance</span>
+            <span className="text-cyan-400 font-bold">
+              {(user?.windBalance ?? 0).toLocaleString()}
+            </span>
+          </label>
+          <p className="text-[10px] text-slate-500">
+            {spinMode === "paid" ? `Costs ${PAID_SPIN_COST} Winds per spin` : "No cost — free daily spin"}
+          </p>
+        </div>
+
+        {/* Payout info */}
         <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-1">
-          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Possible Multipliers</div>
+          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            Fixed Payouts
+          </div>
           <div className="flex justify-between text-slate-300">
             <span>Blessed Hurricane:</span>
-            <span className="text-amber-400 font-bold">10.0x Payout</span>
+            <span className="text-amber-400 font-bold">3000 Winds</span>
           </div>
           <div className="flex justify-between text-slate-300">
             <span>Typhoon Blessing:</span>
-            <span className="text-purple-400 font-bold">5.0x Payout</span>
+            <span className="text-purple-400 font-bold">800 Winds</span>
           </div>
           <div className="flex justify-between text-slate-300">
-            <span>Tempest Surge:</span>
-            <span className="text-cyan-400 font-bold">3.0x Payout</span>
+            <span>Storm Surge:</span>
+            <span className="text-cyan-400 font-bold">500 Winds</span>
+          </div>
+          <div className="flex justify-between text-slate-300">
+            <span>Gale Gust:</span>
+            <span className="text-emerald-400 font-bold">200 Winds</span>
+          </div>
+          <div className="flex justify-between text-slate-300">
+            <span>Brisk Draft:</span>
+            <span className="text-teal-400 font-bold">100 Winds</span>
+          </div>
+          <div className="flex justify-between text-slate-300">
+            <span>Gentle Breeze:</span>
+            <span className="text-sky-400 font-bold">50 Winds</span>
           </div>
         </div>
 
-        {/* Spin CTA */}
-        <button
-          onClick={handleSpin}
-          disabled={isSpinning || (user?.windBalance ?? 0) < bet}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-black text-base shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-emerald-400 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-        >
-          <RotateCcw className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`} />
-          <span>{isSpinning ? "Spinning Gales..." : `Spin for ${bet} Winds`}</span>
-        </button>
+        {bottomContent}
       </div>
     </div>
   );

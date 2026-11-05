@@ -253,6 +253,9 @@ export async function ensureDefaultUser() {
         equippedBadge: "🌬️ Wind Walker",
         equippedAura: "emerald_breeze",
         streakDays: 4,
+        wheelFreeSpinsUsed: 0,
+        wheelPaidSpinsUsed: 0,
+        wheelSpinsDate: new Date(),
       })
       .returning();
     user = newUser;

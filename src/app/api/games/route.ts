@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid game mode" }, { status: 400 });
     }
 
-    const betAmount = Math.max(0, parseInt(bet, 10) || 0);
+    let betAmount = Math.max(0, parseInt(bet, 10) || 0);
 
     if (betAmount > user.windBalance) {
       return NextResponse.json({ error: "Insufficient Winds for this wager!" }, { status: 400 });
@@ -25,24 +25,82 @@ export async function POST(request: Request) {
     let net = 0;
     let resultMessage = "";
     let extraData: Record<string, unknown> = {};
+    // Daily spin counters (used by the wheel game, reset at midnight)
+    let freeUsed = user.wheelFreeSpinsUsed ?? 0;
+    let paidUsed = user.wheelPaidSpinsUsed ?? 0;
+    let spinsDate: Date | null = user.wheelSpinsDate ? new Date(user.wheelSpinsDate) : null;
 
     // 1. WHEEL OF GALES
     if (gameType === "wheel") {
-      if (betAmount < 20) {
-        return NextResponse.json({ error: "Minimum spin bet is 20 Winds" }, { status: 400 });
+      // Daily reset of spin counters
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      const isNewDay =
+        !spinsDate ||
+        spinsDate.getFullYear() !== today.getFullYear() ||
+        spinsDate.getMonth() !== today.getMonth() ||
+        spinsDate.getDate() !== today.getDate();
+
+      if (isNewDay) {
+        freeUsed = 0;
+        paidUsed = 0;
+        spinsDate = today;
       }
 
-      // Wheel segments: [0x, 0.5x, 1.2x, 1.5x, 2x, 3x, 5x, 10x Jackpot]
-      const segments = [
-        { multiplier: 0, label: "Calm Breeze (0x)", weight: 18 },
-        { multiplier: 0.5, label: "Gentle Zephyr (0.5x)", weight: 24 },
-        { multiplier: 1.2, label: "Brisk Draft (1.2x)", weight: 22 },
-        { multiplier: 1.5, label: "Gale Gust (1.5x)", weight: 15 },
-        { multiplier: 2.0, label: "Turbulent Storm (2x)", weight: 10 },
-        { multiplier: 3.0, label: "Tempest Surge (3x)", weight: 6 },
-        { multiplier: 5.0, label: "Typhoon Blessing (5x)", weight: 3 },
-        { multiplier: 10.0, label: "BLESSED HURRICANE (10x)!", weight: 2 },
+      const MAX_FREE_SPINS = 5;
+      const MAX_PAID_SPINS = 5;
+      const PAID_SPIN_COST = 150;
+      const isPaid = body.isPaid === true;
+
+      if (isPaid) {
+        if (paidUsed >= MAX_PAID_SPINS) {
+          return NextResponse.json(
+            { error: "No paid spins remaining today" },
+            { status: 400 }
+          );
+        }
+        if (betAmount < PAID_SPIN_COST) {
+          return NextResponse.json(
+            { error: `Paid spin costs ${PAID_SPIN_COST} Winds` },
+            { status: 400 }
+          );
+        }
+        betAmount = PAID_SPIN_COST;
+        paidUsed += 1;
+      } else {
+        if (freeUsed >= MAX_FREE_SPINS) {
+          return NextResponse.json(
+            { error: "No free spins remaining today" },
+            { status: 400 }
+          );
+        }
+        betAmount = 0;
+        freeUsed += 1;
+      }
+
+      // Wheel segments: fixed payouts (Winds), not multipliers
+      const freeSegments = [
+        { payout: 0, label: "Calm Breeze (0)", weight: 30 },
+        { payout: 50, label: "Gentle Breeze (50)", weight: 25 },
+        { payout: 100, label: "Brisk Draft (100)", weight: 20 },
+        { payout: 200, label: "Gale Gust (200)", weight: 15 },
+        { payout: 500, label: "Storm Surge (500)", weight: 7 },
+        { payout: 800, label: "Typhoon Blessing (800)", weight: 2 },
+        { payout: 3000, label: "BLESSED HURRICANE (3000)!", weight: 1 },
       ];
+
+      const paidSegments = [
+        { payout: 0, label: "Calm Breeze (0)", weight: 15 },
+        { payout: 50, label: "Gentle Breeze (50)", weight: 20 },
+        { payout: 100, label: "Brisk Draft (100)", weight: 22 },
+        { payout: 200, label: "Gale Gust (200)", weight: 18 },
+        { payout: 500, label: "Storm Surge (500)", weight: 12 },
+        { payout: 800, label: "Typhoon Blessing (800)", weight: 8 },
+        { payout: 3000, label: "BLESSED HURRICANE (3000)!", weight: 5 },
+      ];
+
+      const segments = isPaid ? paidSegments : freeSegments;
 
       const totalWeight = segments.reduce((sum, s) => sum + s.weight, 0);
       let rand = Math.random() * totalWeight;
@@ -57,10 +115,16 @@ export async function POST(request: Request) {
       }
 
       const segment = segments[selectedIndex];
-      payout = Math.round(betAmount * segment.multiplier);
+      payout = segment.payout;
       net = payout - betAmount;
-      resultMessage = `Wheel landed on ${segment.label}! Multiplier: ${segment.multiplier}x`;
-      extraData = { segmentIndex: selectedIndex, segment };
+      resultMessage = `Wheel landed on ${segment.label}! Won ${payout} Winds`;
+      extraData = {
+        segmentIndex: selectedIndex,
+        segment,
+        isPaid,
+        freeSpinsRemaining: MAX_FREE_SPINS - freeUsed,
+        paidSpinsRemaining: MAX_PAID_SPINS - paidUsed,
+      };
 
       // Progress wheel quest
       const [wheelQuest] = await db
@@ -182,14 +246,23 @@ export async function POST(request: Request) {
     const newXp = user.xp + xpGained;
     const newLevel = Math.floor(newXp / 250) + 1;
 
+    const userUpdate: Record<string, unknown> = {
+      windBalance: newWindBalance,
+      xp: newXp,
+      level: newLevel,
+      updatedAt: new Date(),
+    };
+
+    // Persist daily spin counters for the wheel game
+    if (gameType === "wheel") {
+      userUpdate.wheelFreeSpinsUsed = freeUsed;
+      userUpdate.wheelPaidSpinsUsed = paidUsed;
+      userUpdate.wheelSpinsDate = spinsDate;
+    }
+
     const [updatedUser] = await db
       .update(users)
-      .set({
-        windBalance: newWindBalance,
-        xp: newXp,
-        level: newLevel,
-        updatedAt: new Date(),
-      })
+      .set(userUpdate)
       .where(eq(users.id, user.id))
       .returning();
 
