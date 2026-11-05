@@ -246,23 +246,6 @@ function WheelOfGales() {
     ? "Free Spin"
     : `Paid Spin (${PAID_SPIN_COST} WND)`;
 
-  const bottomContent = noSpinsLeft ? (
-    <div className="p-3 rounded-xl bg-rose-900/20 border border-rose-500/30 text-center">
-      <p className="text-xs text-rose-400 font-medium">
-        All spins used today — come back tomorrow!
-      </p>
-    </div>
-  ) : (
-    <button
-      onClick={handleSpin}
-      disabled={isSpinning}
-      className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-black text-base shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-emerald-400 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-    >
-      <RotateCcw className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`} />
-      <span>{spinButtonLabel}</span>
-    </button>
-  );
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-4 lg:p-8 rounded-3xl border border-cyan-500/20 bg-slate-900/60">
       {/* Wheel Visual Canvas */}
@@ -319,6 +302,17 @@ function WheelOfGales() {
           </div>
         )}
 
+        {/* Spin button right under the wheel */}
+        <button
+          onClick={handleSpin}
+          disabled={isSpinning || noSpinsLeft}
+          className="w-full py-3.5 rounded-2xl text-slate-950 font-black text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-6"
+          style={{ background: spinMode === "paid" ? "linear-gradient(90deg, #f59e0b, #d97706)" : "linear-gradient(90deg, #06b6d4, #10b981)" }}
+        >
+          <RotateCcw className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`} />
+          <span>{isSpinning ? "Spinning Gales..." : spinButtonLabel}</span>
+          {noSpinsLeft && <span className="text-[10px] text-rose-400">No spins left</span>}
+        </button>
       </div>
 
       {/* Control Panel */}
@@ -422,8 +416,6 @@ function WheelOfGales() {
             <span className="text-sky-400 font-bold">50 Winds</span>
           </div>
         </div>
-
-        {bottomContent}
       </div>
     </div>
   );
