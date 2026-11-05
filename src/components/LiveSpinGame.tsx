@@ -352,23 +352,6 @@ export default function LiveSpinGame() {
             </div>
           </div>
 
-          {/* Spin button right under the wheel */}
-          <button
-            onClick={placeBet}
-            disabled={!canBet || placing || (user?.windBalance ?? 0) < amount}
-            className="w-full py-3.5 rounded-2xl text-slate-950 font-black text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
-            style={{ background: `linear-gradient(90deg, ${COLOR_CFG[color].base}, ${COLOR_CFG[color].alt})` }}
-          >
-            <Sparkles className="w-5 h-5" />
-            {round.status === "betting"
-              ? placing
-                ? "Joining the gale..."
-                : `Spin the Wheel — ${amount.toLocaleString()} on ${COLOR_CFG[color].label}`
-              : round.status === "spinning"
-              ? "Wheel is spinning..."
-              : "Waiting for next round..."}
-          </button>
-
           {/* Color odds + split multiplier */}
           <div className="grid grid-cols-3 gap-2 w-full mt-5">
             {colorStats.map((cs) => {

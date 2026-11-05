@@ -318,6 +318,18 @@ function WheelOfGales() {
             </span>
           </div>
         )}
+
+        {/* Spin button right under the wheel */}
+        <button
+          onClick={handleSpin}
+          disabled={isSpinning || noSpinsLeft}
+          className="w-full py-3.5 rounded-2xl text-slate-950 font-black text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-6"
+          style={{ background: spinMode === "paid" ? "linear-gradient(90deg, #f59e0b, #d97706)" : "linear-gradient(90deg, #06b6d4, #10b981)" }}
+        >
+          <RotateCcw className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`} />
+          <span>{isSpinning ? "Spinning Gales..." : spinButtonLabel}</span>
+          {noSpinsLeft && <span className="text-[10px] text-rose-400">No spins left</span>}
+        </button>
       </div>
 
       {/* Control Panel */}
