@@ -216,7 +216,7 @@ export default function LeaderboardSection() {
           </div>
           <button
             onClick={() => setActiveTab("games")}
-            className="pf-card pf-card-hover p-5 rounded-2xl bg-gradient-to-br from-emerald-600/80 to-cyan-600/80 border border-emerald-400/40 flex items-center gap-4 text-left transition-all"
+            className="pf-card pf-card-hover pf-card-lift p-5 rounded-2xl bg-gradient-to-br from-emerald-600/80 to-cyan-600/80 border border-emerald-400/40 flex items-center gap-4 text-left transition-all"
           >
             <div className="p-3 rounded-xl bg-slate-950/30 text-white">
               <Gamepad2 className="w-6 h-6" />

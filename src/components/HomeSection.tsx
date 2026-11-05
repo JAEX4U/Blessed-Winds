@@ -120,7 +120,7 @@ export default function HomeSection() {
 
           {/* User Fast Overview Card */}
           <div className="lg:col-span-5">
-            <div className="relative rounded-2xl border border-sky-400/30 bg-slate-900/90 backdrop-blur-xl p-6 shadow-xl pf-card pf-card-hover">
+            <div className="relative rounded-2xl border border-sky-400/30 bg-slate-900/90 backdrop-blur-xl p-6 shadow-xl pf-card pf-card-hover pf-card-lift">
               <div className="flex items-center justify-between pb-4 border-b border-slate-800">
                 <div className="flex items-center space-x-3">
                   <div className="text-3xl p-2 rounded-xl bg-cyan-950/80 border border-cyan-500/30">
@@ -201,7 +201,7 @@ export default function HomeSection() {
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
         <div
           onClick={() => setActiveTab("games")}
-          className="pf-card pf-card-hover cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-cyan-500/50 hover:bg-slate-900/90"
+          className="pf-card pf-card-hover pf-card-lift cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-cyan-500/50 hover:bg-slate-900/90"
         >
           <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition-transform">
             <Gamepad2 className="w-6 h-6" />
@@ -216,7 +216,7 @@ export default function HomeSection() {
 
         <div
           onClick={() => setActiveTab("shop")}
-          className="pf-card pf-card-hover cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-emerald-500/50 hover:bg-slate-900/90"
+          className="pf-card pf-card-hover pf-card-lift cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-emerald-500/50 hover:bg-slate-900/90"
         >
           <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition-transform">
             <ShoppingBag className="w-6 h-6" />
@@ -231,7 +231,7 @@ export default function HomeSection() {
 
         <div
           onClick={() => setActiveTab("profile")}
-          className="pf-card pf-card-hover cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-purple-500/50 hover:bg-slate-900/90"
+          className="pf-card pf-card-hover pf-card-lift cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-purple-500/50 hover:bg-slate-900/90"
         >
           <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition-transform">
             <Award className="w-6 h-6" />
@@ -246,7 +246,7 @@ export default function HomeSection() {
 
         <div
           onClick={() => setActiveTab("faq")}
-          className="pf-card pf-card-hover cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-amber-500/50 hover:bg-slate-900/90"
+          className="pf-card pf-card-hover pf-card-lift cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-amber-500/50 hover:bg-slate-900/90"
         >
           <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-110 transition-transform">
             <HelpCircle className="w-6 h-6" />

@@ -178,7 +178,7 @@ export default function ShopSection() {
           return (
             <div
               key={item.id}
-              className="pf-card pf-card-hover group relative rounded-2xl border border-slate-800 hover:border-cyan-500/40 p-6 flex flex-col justify-between transition-all"
+              className="pf-card pf-card-hover pf-card-lift group relative rounded-2xl border border-slate-800 hover:border-cyan-500/40 p-6 flex flex-col justify-between transition-all"
             >
               {/* Item Card Header */}
               <div>
