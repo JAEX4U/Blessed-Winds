@@ -112,7 +112,7 @@ export default function ProfileSection() {
                 </button>
               </div>
               <p className="text-xs text-cyan-400 font-semibold mt-0.5">@{user?.username} • {user?.title}</p>
-              <p className="text-xs text-slate-400 max-w-md mt-2 italic">"{user?.bio}"</p>
+              <p className="text-xs text-slate-400 max-w-md mt-2 italic">“{user?.bio}”</p>
             </div>
           </div>
 

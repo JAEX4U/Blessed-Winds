@@ -22,8 +22,18 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Make your own website | Blessed Winds creator guide",
-  description: "A beginner-friendly guide to run, personalize, and publish the Blessed Winds Next.js website.",
+  title: "Make your own website",
+  description:
+    "A beginner-friendly guide to run, personalize, and publish the Blessed Winds Next.js website.",
+  alternates: { canonical: "/guide" },
+  openGraph: {
+    type: "article",
+    title: "Make your own website · Blessed Winds creator guide",
+    description:
+      "Run Blessed Winds on your computer, change the parts you like, and put it online — step by step.",
+    url: "/guide",
+    images: ["/og.jpg"],
+  },
 };
 
 function Command({ children }: { children: string }) {

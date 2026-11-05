@@ -487,7 +487,7 @@ export default function LiveSpinGame() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-400 flex items-center gap-1.5">
-                <Coins className="w-4 h-4 text-amber-400" /> You'd collect if it hits
+                <Coins className="w-4 h-4 text-amber-400" /> You’d collect if it hits
               </span>
               <span className="font-black text-amber-300 tabular-nums">~{joinPayout.toLocaleString()} WND</span>
             </div>
@@ -522,7 +522,7 @@ export default function LiveSpinGame() {
               <div className="font-black text-white">{myTotal.toLocaleString()} Winds</div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] uppercase font-bold text-cyan-400">Your colors' chance</div>
+              <div className="text-[10px] uppercase font-bold text-cyan-400">Your colors’ chance</div>
               <div className="text-xl font-black text-cyan-300 tabular-nums">{myChance.toFixed(1)}%</div>
             </div>
           </div>

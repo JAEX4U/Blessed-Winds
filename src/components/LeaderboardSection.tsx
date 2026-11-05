@@ -380,7 +380,7 @@ export default function LeaderboardSection() {
               <Zap className="w-4 h-4" /> Season Rewards
             </div>
             <ul className="text-xs text-slate-300 space-y-1.5">
-              <li>👑 <b className="text-amber-300">#1</b> — Divine "Sky Sovereign" title + 100 Gems</li>
+              <li>👑 <b className="text-amber-300">#1</b> — Divine “Sky Sovereign” title + 100 Gems</li>
               <li>🥈 <b className="text-slate-200">#2</b> — 60 Gems + Legendary Aura</li>
               <li>🥉 <b className="text-orange-300">#3</b> — 30 Gems + Epic Charm</li>
               <li>🌬️ <b className="text-cyan-300">Top 10</b> — 2,500 Winds bonus</li>

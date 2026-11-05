@@ -3,6 +3,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { UserData, InventoryItem, QuestItem, TransactionItem } from "@/types";
 
+export type TabId = "home" | "games" | "shop" | "leaderboard" | "profile" | "faq";
+
+export const TAB_IDS: TabId[] = ["home", "games", "shop", "leaderboard", "profile", "faq"];
+
+/** Reads the current tab from the URL hash, e.g. `/#shop` → "shop". */
+export function readTabFromLocation(): TabId {
+  if (typeof window === "undefined") return "home";
+  const raw = window.location.hash.replace(/^#\/?/, "").split(/[?&]/)[0].toLowerCase();
+  return (TAB_IDS as string[]).includes(raw) ? (raw as TabId) : "home";
+}
+
 interface UserContextType {
   user: UserData | null;
   inventory: InventoryItem[];
@@ -13,8 +24,8 @@ interface UserContextType {
   claimDailyBlessing: () => Promise<{ success: boolean; message: string }>;
   offerFountain: () => Promise<{ success: boolean; message: string; amount?: number }>;
   setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
-  activeTab: "home" | "games" | "shop" | "leaderboard" | "profile" | "faq";
-  setActiveTab: (tab: "home" | "games" | "shop" | "leaderboard" | "profile" | "faq") => void;
+  activeTab: TabId;
+  setActiveTab: (tab: TabId) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -25,7 +36,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [quests, setQuests] = useState<QuestItem[]>([]);
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"home" | "games" | "shop" | "leaderboard" | "profile" | "faq">("home");
+  // Always start on the sanctuary so the client's first render matches the
+  // server HTML; a deep link (/#games, /#shop …) is applied right after mount.
+  const [activeTab, setActiveTabState] = useState<TabId>("home");
 
   const refreshUser = useCallback(async () => {
     try {
@@ -47,6 +60,29 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
+
+  // Keep the active tab and the URL hash in sync, so browser back/forward and
+  // shared links land on the right section.
+  useEffect(() => {
+    const syncFromUrl = () => setActiveTabState(readTabFromLocation());
+    syncFromUrl(); // honour a deep link once we are hydrated
+    window.addEventListener("popstate", syncFromUrl);
+    window.addEventListener("hashchange", syncFromUrl);
+    return () => {
+      window.removeEventListener("popstate", syncFromUrl);
+      window.removeEventListener("hashchange", syncFromUrl);
+    };
+  }, []);
+
+  const setActiveTab = useCallback((tab: TabId) => {
+    setActiveTabState(tab);
+    if (typeof window === "undefined") return;
+    const hash = `#${tab}`;
+    if (window.location.hash !== hash) {
+      window.history.pushState({ tab }, "", hash);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const claimDailyBlessing = async () => {
     try {
