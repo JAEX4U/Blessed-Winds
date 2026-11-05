@@ -85,7 +85,7 @@ export default function LiveSpinGame() {
   const [amount, setAmount] = useState(100);
   const [placing, setPlacing] = useState(false);
   const [feedback, setFeedback] = useState<{ msg: string; error?: boolean } | null>(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState<number>(0);
   const [rotation, setRotation] = useState(0);
   const [spinTransition, setSpinTransition] = useState<string>("none");
 
@@ -94,6 +94,8 @@ export default function LiveSpinGame() {
   const spunRef = useRef<number | null>(null);
   const celebratedRef = useRef<number | null>(null);
   const paidRefreshRef = useRef<number | null>(null);
+  const nowRef = useRef<number>(0);
+  const rafRef = useRef<number | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -108,14 +110,41 @@ export default function LiveSpinGame() {
     }
   }, []);
 
+  // Countdown driven by requestAnimationFrame. State only updates when the
+  // whole second changes, avoiding 10fps full re-renders from the old setInterval.
+  useEffect(() => {
+    nowRef.current = Date.now() + offsetRef.current;
+    setNow(nowRef.current);
+
+    let lastSecond = -1;
+    const loop = () => {
+      nowRef.current = Date.now() + offsetRef.current;
+      const second = Math.floor(nowRef.current / 1000);
+      if (second !== lastSecond && state) {
+        lastSecond = second;
+        const round = state.round;
+        const bettingLeft = round
+          ? Math.max(0, new Date(round.bettingEndsAt).getTime() - nowRef.current)
+          : 0;
+        const revealLeft = round?.spinEndsAt
+          ? Math.max(0, new Date(round.spinEndsAt).getTime() + round.revealMs - nowRef.current)
+          : 0;
+        if (bettingLeft > 0 || revealLeft > 0) {
+          setNow(nowRef.current);
+        }
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [state, offsetRef]);
+
   useEffect(() => {
     load();
-    const poll = setInterval(load, 2000);
-    const tick = setInterval(() => setNow(Date.now() + offsetRef.current), 100);
-    return () => {
-      clearInterval(poll);
-      clearInterval(tick);
-    };
+    const poll = setInterval(load, 3000);
+    return () => clearInterval(poll);
   }, [load]);
 
   // Drive the wheel from authoritative server phases.

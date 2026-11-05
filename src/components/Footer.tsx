@@ -10,7 +10,10 @@ function RealmStatus() {
 
   useEffect(() => {
     let alive = true;
+    let timer: ReturnType<typeof setInterval> | null = null;
+
     const ping = async () => {
+      if (!alive || document.visibilityState === "hidden") return;
       try {
         const res = await fetch("/api/health", { cache: "no-store" });
         const json = (await res.json()) as { ok?: boolean };
@@ -19,11 +22,20 @@ function RealmStatus() {
         if (alive) setStatus("offline");
       }
     };
+
     void ping();
-    const timer = setInterval(ping, 60_000);
+    timer = setInterval(ping, 60_000);
+
+    // Pause polling when the tab is hidden to save battery and requests
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") void ping();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
       alive = false;
-      clearInterval(timer);
+      if (timer) clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);
 

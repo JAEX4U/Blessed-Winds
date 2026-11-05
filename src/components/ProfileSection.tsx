@@ -45,6 +45,7 @@ export default function ProfileSection() {
       setIsSaving(false);
       if (res.ok) {
         setUser(data.user);
+        await refreshUser();
         setIsEditing(false);
       }
     } catch {

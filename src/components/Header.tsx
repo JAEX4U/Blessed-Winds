@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useUser } from "@/context/UserContext";
 import type { TabId } from "@/context/UserContext";
 import {
@@ -28,6 +28,7 @@ export default function Header() {
   const [dailyStatus, setDailyStatus] = useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const lastConfettiRef = useRef(0);
 
   const handleDailyClick = async () => {
     setIsClaiming(true);
@@ -35,12 +36,17 @@ export default function Header() {
     setIsClaiming(false);
     setDailyStatus(result.message);
     if (result.success) {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.2 },
-        colors: ["#38bdf8", "#34d399", "#fbbf24", "#a855f7"],
-      });
+      // Debounce confetti: max once per 2 seconds to avoid canvas spam
+      const now = Date.now();
+      if (now - lastConfettiRef.current > 2000) {
+        lastConfettiRef.current = now;
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.2 },
+          colors: ["#38bdf8", "#34d399", "#fbbf24", "#a855f7"],
+        });
+      }
     }
     setTimeout(() => setDailyStatus(null), 5000);
   };

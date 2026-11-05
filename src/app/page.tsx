@@ -16,7 +16,6 @@ import { Wind } from "lucide-react";
 function LoadingScreen() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-abyss-950 text-cyan-400">
-      <AmbientBackground />
       <div className="flex flex-col items-center space-y-5">
         <div className="relative flex h-20 w-20 items-center justify-center">
           <div className="absolute inset-0 animate-spin-slow rounded-full border border-cyan-400/20" />
