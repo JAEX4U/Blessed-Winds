@@ -52,12 +52,12 @@ export default function Header() {
   };
 
   const navItems = [
-    { id: "home", label: "Sanctuary", icon: Wind },
-    { id: "games", label: "Wind Games", icon: Gamepad2 },
+    { id: "home", label: "Home", icon: Wind },
+    { id: "games", label: "Games", icon: Gamepad2 },
     { id: "shop", label: "Shop", icon: ShoppingBag },
     { id: "leaderboard", label: "Leaderboard", icon: Trophy },
-    { id: "profile", label: "My Profile", icon: User },
-    { id: "faq", label: "FAQ & Lore", icon: HelpCircle },
+    { id: "profile", label: "Profile", icon: User },
+    { id: "faq", label: "FAQ", icon: HelpCircle },
   ];
 
   return (
@@ -84,7 +84,7 @@ export default function Header() {
                 </span>
               </div>
               <p className="text-xs text-sky-300/60 font-medium tracking-wide">
-                Gather Winds • Ride The Gales • Ascend
+                Free-to-Play Wind Games
               </p>
             </div>
           </div>
@@ -126,9 +126,9 @@ export default function Header() {
               <div className="p-1 rounded-lg bg-cyan-500/20 text-cyan-400">
                 <Wind className="w-4 h-4 animate-spin" style={{ animationDuration: "8s" }} />
               </div>
-              <div className="text-left">
+                <div className="text-left">
                 <div className="text-[10px] text-cyan-300/70 font-semibold uppercase tracking-wider">
-                  Winds Balance
+                  Balance
                 </div>
                 <div className="text-sm font-extrabold text-cyan-200 flex items-center space-x-1">
                   <span>{(user?.windBalance ?? 0).toLocaleString()}</span>
@@ -167,7 +167,7 @@ export default function Header() {
               title="Claim your Daily Blessed Winds"
             >
               <Sparkles className="w-4 h-4 text-slate-950 fill-amber-300 animate-pulse" />
-              <span>{isClaiming ? "Invoking..." : "Daily Gift"}</span>
+              <span>{isClaiming ? "Claiming..." : "Daily Gift"}</span>
             </button>
           </div>
 
@@ -225,7 +225,7 @@ export default function Header() {
             className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 text-slate-950 font-bold text-sm flex items-center justify-center space-x-2"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Claim Daily Winds Blessing</span>
+            <span>Daily Gift</span>
           </button>
 
           <div className="space-y-1 pt-2">

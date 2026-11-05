@@ -150,14 +150,14 @@ export function WinnersTicker() {
     const wins = board?.recentWins ?? [];
     if (wins.length === 0) {
       return [
-        { label: "Wheel of Gales", detail: "Blessed Hurricane 10x payout claimed", icon: "🌪️" },
-        { label: "Live Jackpot Arena", detail: "Green riders split a 950 pot", icon: "🟢" },
-        { label: "Cyclone Rush", detail: "4,850 Winds cashed out at 9.7x", icon: "🌀" },
+        { label: "Wheel of Gales", detail: "10x payout claimed", icon: "🌪️" },
+        { label: "Live Arena", detail: "Green riders split 950 pot", icon: "🟢" },
+        { label: "Cyclone Rush", detail: "4,850 Winds at 9.7x", icon: "🌀" },
       ];
     }
     return wins.map((win) => ({
       label: win.displayName,
-      detail: `${GAME_LABEL[win.gameType] ?? win.gameType} · +${win.payoutWinds.toLocaleString()} Winds`,
+      detail: `${GAME_LABEL[win.gameType] ?? win.gameType} · +${win.payoutWinds.toLocaleString()}`,
       icon: win.avatarUrl || "🌪️",
     }));
   }, [board]);
@@ -223,7 +223,7 @@ export function LiveArenaCard() {
         </span>
         <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold text-cyan-200">
           <Users className="h-3 w-3" />
-          {data?.playersCount ?? 0} riding
+          {data?.playersCount ?? 0} players
         </span>
       </div>
 
@@ -238,16 +238,15 @@ export function LiveArenaCard() {
         </div>
 
         <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-wider text-slate-400">Pot on the table</p>
+          <p className="text-[11px] uppercase tracking-wider text-slate-400">Pot</p>
           <p className="text-2xl font-black text-white">
-            {pot.toLocaleString()} <span className="text-xs font-bold text-emerald-400">WINDS</span>
+            {pot.toLocaleString()} <span className="text-xs font-bold text-emerald-400">WND</span>
           </p>
           <p className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-400">
             {isBetting ? (
               <>
                 <Timer className="h-3.5 w-3.5 text-cyan-400" />
-                Bets close in{" "}
-                <span className="font-bold text-cyan-300 tabular-nums">{countdown}s</span>
+                Bets close in <span className="font-bold text-cyan-300 tabular-nums">{countdown}s</span>
               </>
             ) : (
               <>
@@ -284,7 +283,7 @@ export function LiveArenaCard() {
         onClick={() => setActiveTab("games")}
         className="relative mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 py-2 text-xs font-bold text-emerald-200 transition hover:bg-emerald-500/20"
       >
-        Join the round <ArrowRight className="h-3.5 w-3.5" />
+        Join <ArrowRight className="h-3.5 w-3.5" />
       </button>
     </div>
   );
@@ -304,7 +303,7 @@ export function TopRidersCard() {
 
       <div className="relative flex items-center justify-between">
         <span className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-amber-300">
-          <Trophy className="h-3.5 w-3.5" /> Hall of Gales
+          <Trophy className="h-3.5 w-3.5" /> Top Riders
         </span>
         {board?.me ? (
           <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-200">
@@ -373,7 +372,7 @@ export function QuestsCard() {
 
       <div className="relative flex items-center justify-between">
         <span className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-purple-300">
-          <Target className="h-3.5 w-3.5" /> Daily Quests
+          <Target className="h-3.5 w-3.5" /> Quests
         </span>
         <span className="rounded-full border border-purple-500/25 bg-purple-500/10 px-2 py-0.5 text-[10px] font-bold text-purple-200">
           {done}/{quests.length || 0} claimed
@@ -439,20 +438,20 @@ export function QuestsCard() {
 const STEPS = [
   {
     icon: Sparkles,
-    title: "Claim the daily blessing",
-    body: "Open the sanctuary every day. Your streak multiplies the Winds and Sky Gems the Four Gales grant you.",
+    title: "Daily Blessing",
+    body: "Claim your daily gift every 24 hours.",
     accent: "from-amber-400/20 to-transparent text-amber-300 border-amber-400/30",
   },
   {
     icon: Wind,
-    title: "Play the wind games",
-    body: "Wager Winds on the Wheel, ride the Cyclone, spin the Tempest slots or tap the Harvester — every win levels you up.",
+    title: "Play Games",
+    body: "Play Wheel, Cyclone, Slots, or Harvester to win Winds.",
     accent: "from-cyan-400/20 to-transparent text-cyan-300 border-cyan-400/30",
   },
   {
     icon: Crown,
-    title: "Ascend the pantheon",
-    body: "Spend Winds in the Breeze Bazaar on auras, charms and titles, then climb the Hall of Gales leaderboard.",
+    title: "Climb Leaderboard",
+    body: "Spend Winds on auras and titles. Climb the ranks.",
     accent: "from-emerald-400/20 to-transparent text-emerald-300 border-emerald-400/30",
   },
 ];
@@ -465,14 +464,14 @@ export function HowItWorks() {
       <div className="absolute inset-x-0 top-0 h-px hairline" />
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-2xl font-black text-white">Three gusts to glory</h2>
-          <p className="text-sm text-slate-400">The whole loop takes about a minute a day.</p>
+          <h2 className="text-2xl font-black text-white">How to Play</h2>
+          <p className="text-sm text-slate-400">Claim, play, and climb.</p>
         </div>
         <button
           onClick={() => setActiveTab("faq")}
           className="inline-flex items-center gap-1.5 self-start rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-bold text-cyan-300 transition hover:bg-cyan-500/20"
         >
-          How the winds work <ArrowRight className="h-3.5 w-3.5" />
+          FAQ <ArrowRight className="h-3.5 w-3.5" />
         </button>
       </div>
 
