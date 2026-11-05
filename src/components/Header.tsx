@@ -55,7 +55,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-sky-500/15 bg-abyss-950/75 shadow-[0_18px_40px_-30px_rgba(8,145,178,0.8)] backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-sky-500/15 bg-abyss-950/90 shadow-[0_18px_40px_-30px_rgba(8,145,178,0.8)] backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo & Brand */}
@@ -93,7 +93,7 @@ export default function Header() {
                   key={item.id}
                   onClick={() => setActiveTab(item.id as TabId)}
                   aria-current={isActive ? "page" : undefined}
-                  className={`relative flex items-center space-x-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all duration-200 ${
+                  className={`relative flex items-center space-x-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all duration-200 pf-card-hover ${
                     isActive
                       ? "bg-gradient-to-r from-sky-500/20 to-cyan-500/30 text-cyan-300 border border-cyan-400/30 shadow-md shadow-cyan-500/10"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/60"

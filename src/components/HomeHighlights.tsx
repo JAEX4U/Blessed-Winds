@@ -165,7 +165,7 @@ export function WinnersTicker() {
   const track = [...rows, ...rows];
 
   return (
-    <div className="fade-x relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-slate-950/60 py-3 backdrop-blur">
+    <div className="pf-card pf-card-hover fade-x relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-slate-950/60 py-3 backdrop-blur">
       <div className="animate-marquee flex w-max items-center gap-10 whitespace-nowrap px-6">
         {track.map((row, index) => (
           <span
@@ -210,7 +210,7 @@ export function LiveArenaCard() {
   const isBetting = round?.status === "betting";
 
   return (
-    <div className="card-lift glass-panel relative overflow-hidden rounded-2xl p-5">
+    <div className="pf-card pf-card-hover relative overflow-hidden rounded-2xl p-5">
       <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
 
       <div className="relative flex items-center justify-between">
@@ -299,7 +299,7 @@ export function TopRidersCard() {
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
-    <div className="card-lift glass-panel relative overflow-hidden rounded-2xl p-5">
+    <div className="pf-card pf-card-hover relative overflow-hidden rounded-2xl p-5">
       <div className="absolute -left-14 -top-14 h-36 w-36 rounded-full bg-amber-500/10 blur-3xl" />
 
       <div className="relative flex items-center justify-between">
@@ -368,7 +368,7 @@ export function QuestsCard() {
   const done = quests.filter((quest) => quest.isClaimed).length;
 
   return (
-    <div className="card-lift glass-panel relative overflow-hidden rounded-2xl p-5">
+    <div className="pf-card pf-card-hover relative overflow-hidden rounded-2xl p-5">
       <div className="absolute -right-12 bottom-[-3rem] h-36 w-36 rounded-full bg-purple-500/10 blur-3xl" />
 
       <div className="relative flex items-center justify-between">
@@ -482,7 +482,7 @@ export function HowItWorks() {
           return (
             <div
               key={step.title}
-              className={`card-lift relative overflow-hidden rounded-xl border bg-slate-950/60 p-5 ${step.accent}`}
+              className={`pf-card pf-card-hover relative overflow-hidden rounded-xl border bg-slate-950/60 p-5 ${step.accent}`}
             >
               <span className="absolute right-4 top-3 text-4xl font-black text-white/5">
                 0{index + 1}

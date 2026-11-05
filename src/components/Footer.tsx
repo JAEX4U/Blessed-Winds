@@ -55,7 +55,7 @@ export default function Footer() {
     <footer className="border-t border-slate-800/80 bg-slate-950/90 text-slate-400 text-xs py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-3">
+          <div className="pf-card p-6 space-y-3">
             <div className="flex items-center space-x-2">
               <div className="p-1 rounded-lg bg-cyan-500/20 text-cyan-400">
                 <Wind className="w-5 h-5" />
@@ -68,7 +68,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <div>
+          <div className="pf-card p-6">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Navigation</h4>
             <ul className="space-y-2">
               <li>
@@ -109,7 +109,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="pf-card p-6">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Games Arena</h4>
             <ul className="space-y-2">
               <li>
@@ -140,7 +140,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="pf-card p-6">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Sanctuary Rules</h4>
             <p className="text-slate-400 leading-relaxed mb-3">
               Play responsibly and enjoy the celestial gusts. Wind tokens are purely digital entertainment in this realm.

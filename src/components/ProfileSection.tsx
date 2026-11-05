@@ -269,7 +269,7 @@ export default function ProfileSection() {
       {/* Tab: Overview */}
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+          <div className="pf-card p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Shield className="w-4 h-4 text-cyan-400" />
               Blessing Tier
@@ -283,7 +283,7 @@ export default function ProfileSection() {
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+          <div className="pf-card p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-emerald-400" />
               Equipped Aura
@@ -299,7 +299,7 @@ export default function ProfileSection() {
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+          <div className="pf-card p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Award className="w-4 h-4 text-purple-400" />
               Equipped Badge
@@ -327,7 +327,7 @@ export default function ProfileSection() {
               {inventory.map((inv) => (
                 <div
                   key={inv.inventoryId}
-                  className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3"
+                  className="pf-card p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3"
                 >
                   <div className="flex items-start justify-between">
                     <div className="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-3xl">
@@ -362,7 +362,7 @@ export default function ProfileSection() {
             return (
               <div
                 key={quest.id}
-                className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="pf-card p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
@@ -414,7 +414,7 @@ export default function ProfileSection() {
 
       {/* Tab: History */}
       {activeTab === "history" && (
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden">
+        <div className="pf-card rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden">
           <div className="p-4 bg-slate-900 border-b border-slate-800 text-xs font-bold text-slate-400 uppercase tracking-wider">
             Recent Wind Ledger Activity
           </div>
