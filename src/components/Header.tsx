@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useUser } from "@/context/UserContext";
+import type { TabId } from "@/context/UserContext";
 import {
   Wind,
   Sparkles,
@@ -17,6 +18,7 @@ import {
   Volume2,
   VolumeX,
   Trophy,
+  Flame,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -53,7 +55,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/80 border-b border-sky-500/20 shadow-lg shadow-sky-950/20">
+    <header className="sticky top-0 z-50 border-b border-sky-500/15 bg-abyss-950/75 shadow-[0_18px_40px_-30px_rgba(8,145,178,0.8)] backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo & Brand */}
@@ -89,15 +91,19 @@ export default function Header() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id as any)}
-                  className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                  onClick={() => setActiveTab(item.id as TabId)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`relative flex items-center space-x-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all duration-200 ${
                     isActive
                       ? "bg-gradient-to-r from-sky-500/20 to-cyan-500/30 text-cyan-300 border border-cyan-400/30 shadow-md shadow-cyan-500/10"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? "text-cyan-400 animate-bounce" : ""}`} />
+                  <Icon className={`h-4 w-4 ${isActive ? "text-cyan-400" : ""}`} />
                   <span>{item.label}</span>
+                  {isActive && (
+                    <span className="absolute inset-x-3 -bottom-px h-px hairline" />
+                  )}
                 </button>
               );
             })}
@@ -136,6 +142,17 @@ export default function Header() {
               </div>
             </div>
 
+            {/* Daily streak */}
+            <div
+              className="flex items-center space-x-1.5 rounded-xl border border-amber-500/25 bg-slate-900/80 px-2.5 py-1.5"
+              title={`Daily streak: ${user?.streakDays ?? 1} days`}
+            >
+              <Flame className="h-4 w-4 text-amber-400" />
+              <span className="text-xs font-bold text-amber-200 tabular-nums">
+                {user?.streakDays ?? 1}d
+              </span>
+            </div>
+
             {/* Daily Blessing Button */}
             <button
               onClick={handleDailyClick}
@@ -156,7 +173,9 @@ export default function Header() {
             </div>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl bg-slate-900 text-slate-300 border border-slate-800"
+              aria-expanded={mobileMenuOpen}
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              className="rounded-xl border border-slate-800 bg-slate-900 p-2 text-slate-300 transition hover:border-cyan-500/40 hover:text-cyan-300 lg:hidden"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -211,7 +230,7 @@ export default function Header() {
                 <button
                   key={item.id}
                   onClick={() => {
-                    setActiveTab(item.id as any);
+                    setActiveTab(item.id as TabId);
                     setMobileMenuOpen(false);
                   }}
                   className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-left transition-colors ${

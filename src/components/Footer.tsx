@@ -1,8 +1,52 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useUser } from "@/context/UserContext";
-import { Wind, Heart, Shield, Sparkles } from "lucide-react";
+import { Wind, Heart, Shield, Sparkles, Activity } from "lucide-react";
+
+/** Small live indicator that pings /api/health so visitors can see the realm is up. */
+function RealmStatus() {
+  const [status, setStatus] = useState<"checking" | "online" | "offline">("checking");
+
+  useEffect(() => {
+    let alive = true;
+    const ping = async () => {
+      try {
+        const res = await fetch("/api/health", { cache: "no-store" });
+        const json = (await res.json()) as { ok?: boolean };
+        if (alive) setStatus(res.ok && json.ok ? "online" : "offline");
+      } catch {
+        if (alive) setStatus("offline");
+      }
+    };
+    void ping();
+    const timer = setInterval(ping, 60_000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  const palette =
+    status === "online"
+      ? "text-emerald-300 border-emerald-400/30 bg-emerald-500/10"
+      : status === "offline"
+        ? "text-rose-300 border-rose-400/30 bg-rose-500/10"
+        : "text-slate-400 border-slate-700 bg-slate-900";
+
+  const label =
+    status === "online" ? "Realm online" : status === "offline" ? "Realm offline" : "Checking realm…";
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${palette}`}
+      title="Live database connection status"
+    >
+      <Activity className="h-3 w-3" />
+      {label}
+    </span>
+  );
+}
 
 export default function Footer() {
   const { setActiveTab } = useUser();
@@ -109,7 +153,10 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-slate-500 text-[11px] gap-4">
-          <div>© 2026 Blessed Winds Sanctuary. All celestial rights reserved.</div>
+          <div className="flex items-center gap-3">
+            <span>© 2026 Blessed Winds Sanctuary. All celestial rights reserved.</span>
+            <RealmStatus />
+          </div>
           <div className="flex items-center space-x-1">
             <span>Powered by the Four Gales &</span>
             <Sparkles className="w-3 h-3 text-cyan-400" />

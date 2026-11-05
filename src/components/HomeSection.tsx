@@ -16,6 +16,7 @@ import {
   Award,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import HomeHighlights from "@/components/HomeHighlights";
 
 export default function HomeSection() {
   const { user, setActiveTab, offerFountain } = useUser();
@@ -43,8 +44,18 @@ export default function HomeSection() {
       {/* Hero Banner */}
       <section className="relative overflow-hidden rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-slate-900/90 via-slate-950 to-sky-950/80 p-8 md:p-12 shadow-2xl shadow-cyan-950/40">
         {/* Ambient atmospheric gusts */}
-        <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-cyan-500/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-cyan-500/15 blur-3xl animate-glow" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl animate-glow" />
+        <div className="pointer-events-none absolute inset-0 grid-lines opacity-40" />
+        {/* Ornamental wind compass */}
+        <div className="pointer-events-none absolute -right-20 top-1/2 hidden -translate-y-1/2 lg:block">
+          <div className="relative h-[30rem] w-[30rem]">
+            <div className="absolute inset-0 rounded-full border border-cyan-400/10" />
+            <div className="absolute inset-10 animate-spin-slower rounded-full border border-dashed border-cyan-300/15" />
+            <div className="absolute inset-24 rounded-full border border-emerald-300/10" />
+            <div className="absolute inset-0 animate-spin-slow [background:conic-gradient(from_0deg,transparent_0deg,rgba(34,211,238,0.16)_20deg,transparent_60deg,transparent_180deg,rgba(52,211,153,0.14)_200deg,transparent_240deg)] rounded-full" />
+          </div>
+        </div>
         
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-6">
@@ -55,7 +66,7 @@ export default function HomeSection() {
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
               Harness the Power of{" "}
-              <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-emerald-400 bg-clip-text text-transparent underline decoration-cyan-400/30">
+              <span className="text-gradient underline decoration-cyan-400/30">
                 Blessed Winds
               </span>
             </h1>
@@ -64,6 +75,26 @@ export default function HomeSection() {
               Step into an ethereal realm where gentle breezes and torrential typhoons grant boundless wealth.
               Earn winds, wager in fortune games, expand your mystical inventory, and ascend to Archon status.
             </p>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {[
+                { icon: Gamepad2, label: "5 games" },
+                { icon: TrendingUp, label: "Live pot arena" },
+                { icon: ShieldCheck, label: "Play-money only" },
+                { icon: Compass, label: "9 rival riders" },
+              ].map((chip) => {
+                const ChipIcon = chip.icon;
+                return (
+                  <span
+                    key={chip.label}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-700/70 bg-slate-900/60 px-3 py-1 text-[11px] font-semibold text-slate-300 backdrop-blur"
+                  >
+                    <ChipIcon className="h-3.5 w-3.5 text-cyan-400" />
+                    {chip.label}
+                  </span>
+                );
+              })}
+            </div>
 
             <div className="flex flex-wrap gap-4 pt-2">
               <button
@@ -158,11 +189,14 @@ export default function HomeSection() {
         </div>
       </section>
 
+      {/* Live arena, top riders, daily quests */}
+      <HomeHighlights />
+
       {/* Featured Feature Cards */}
       <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div
           onClick={() => setActiveTab("games")}
-          className="cursor-pointer group relative p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900/90 transition-all shadow-lg"
+          className="card-lift cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-cyan-500/50 hover:bg-slate-900/90"
         >
           <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition-transform">
             <Gamepad2 className="w-6 h-6" />
@@ -175,7 +209,7 @@ export default function HomeSection() {
 
         <div
           onClick={() => setActiveTab("shop")}
-          className="cursor-pointer group relative p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-900/90 transition-all shadow-lg"
+          className="card-lift cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-emerald-500/50 hover:bg-slate-900/90"
         >
           <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition-transform">
             <ShoppingBag className="w-6 h-6" />
@@ -188,7 +222,7 @@ export default function HomeSection() {
 
         <div
           onClick={() => setActiveTab("profile")}
-          className="cursor-pointer group relative p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-purple-500/50 hover:bg-slate-900/90 transition-all shadow-lg"
+          className="card-lift cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-purple-500/50 hover:bg-slate-900/90"
         >
           <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition-transform">
             <Award className="w-6 h-6" />
@@ -201,7 +235,7 @@ export default function HomeSection() {
 
         <div
           onClick={() => setActiveTab("faq")}
-          className="cursor-pointer group relative p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-900/90 transition-all shadow-lg"
+          className="card-lift cursor-pointer group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg hover:border-amber-500/50 hover:bg-slate-900/90"
         >
           <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-110 transition-transform">
             <HelpCircle className="w-6 h-6" />
@@ -231,28 +265,28 @@ export default function HomeSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-emerald-500/20 space-y-2">
+          <div className="card-lift rounded-xl border border-emerald-500/20 bg-slate-900/80 p-4 space-y-2">
             <div className="text-2xl">🌱 Zephyrus (West)</div>
             <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider">The Gentle Spring</div>
             <p className="text-xs text-slate-400">
               Reliable growth. Powers the daily Wind Harvester and guarantees steady wind tokens.
             </p>
           </div>
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-cyan-500/20 space-y-2">
+          <div className="card-lift rounded-xl border border-cyan-500/20 bg-slate-900/80 p-4 space-y-2">
             <div className="text-2xl">❄️ Boreas (North)</div>
             <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider">The Frost Hurricane</div>
             <p className="text-xs text-slate-400">
               High risk, high payout. Dictates the high multipliers in the Cyclone Rush crash game.
             </p>
           </div>
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-amber-500/20 space-y-2">
+          <div className="card-lift rounded-xl border border-amber-500/20 bg-slate-900/80 p-4 space-y-2">
             <div className="text-2xl">☀️ Notus (South)</div>
             <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">The Blazing Gale</div>
             <p className="text-xs text-slate-400">
               Brings warmth and rare treasures into the Bazaar shop with limited-edition charms.
             </p>
           </div>
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-purple-500/20 space-y-2">
+          <div className="card-lift rounded-xl border border-purple-500/20 bg-slate-900/80 p-4 space-y-2">
             <div className="text-2xl">⚡ Eurus (East)</div>
             <div className="text-xs font-bold text-purple-400 uppercase tracking-wider">The Storm Whirlwind</div>
             <p className="text-xs text-slate-400">
