@@ -91,7 +91,7 @@ const files = [
   {
     path: "src/lib/seed.ts",
     label: "Starter content",
-    detail: "Adjust example shop items, quests, and demo rivals for a fresh database.",
+    detail: "Adjust example shop items and quests for a fresh database.",
     icon: Sparkles,
     color: "text-pink-300",
   },
@@ -208,7 +208,7 @@ export default function GuidePage() {
                   );
                 })}
               </div>
-              <p className="mt-5 text-xs leading-6 text-slate-500">Tip: seeded example items and rivals are only inserted when their tables are empty. Changing the seed file will not overwrite existing database rows.</p>
+              <p className="mt-5 text-xs leading-6 text-slate-500">Tip: seeded example items are only inserted when their tables are empty. Changing the seed file will not overwrite existing database rows.</p>
             </section>
 
             <section id="publish" className="scroll-mt-8 rounded-3xl border border-white/[0.09] bg-slate-900/60 p-6 sm:p-8">
@@ -249,7 +249,7 @@ export default function GuidePage() {
                 </div>
               </div>
               <p className="mt-4 text-sm leading-7 text-slate-300">
-                Right now, visitors share one demo player account, and the rival riders are simulated. Before inviting real players,
+                Right now, visitors share one demo player account. Before inviting real players,
                 add sign-up and login, give every person their own account and balance, protect API routes, and add rate limits and
                 transaction-safe game payouts. Keep Winds as play-money; do not use this demo for real-money wagering.
               </p>

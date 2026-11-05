@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { users, shopItems, userQuests, userInventory, gameSessions } from "@/db/schema";
+import { users, shopItems, userQuests, userInventory } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const DEFAULT_USERNAME = "zephyr_traveler";
@@ -183,57 +183,7 @@ export const INITIAL_QUESTS = [
   },
 ];
 
-export const RIVAL_PLAYERS = [
-  { username: "storm_archon", displayName: "Aeris Stormborn", avatarUrl: "👑", windBalance: 48250, gemBalance: 320, level: 42, xp: 10300, title: "High Wind Archon", blessingTier: "Divine Tempest", streakDays: 87 },
-  { username: "gale_dragon", displayName: "Kaelen Skydrake", avatarUrl: "🐉", windBalance: 31780, gemBalance: 210, level: 35, xp: 8550, title: "Herald of the Tempest", blessingTier: "Golden Gale", streakDays: 54 },
-  { username: "breeze_witch", displayName: "Lyra Mistweaver", avatarUrl: "🔮", windBalance: 22410, gemBalance: 150, level: 29, xp: 7050, title: "Cyclone Seer", blessingTier: "Golden Gale", streakDays: 41 },
-  { username: "falcon_rider", displayName: "Talon Swiftwing", avatarUrl: "🦅", windBalance: 15600, gemBalance: 98, level: 23, xp: 5600, title: "Sky Falcon Knight", blessingTier: "Silver Gale Disciple", streakDays: 28 },
-  { username: "thunder_monk", displayName: "Rai Voltaris", avatarUrl: "⚡", windBalance: 9870, gemBalance: 64, level: 17, xp: 4100, title: "Thunder Monk", blessingTier: "Silver Gale Disciple", streakDays: 19 },
-  { username: "leaf_dancer", displayName: "Sylva Greenleaf", avatarUrl: "🍃", windBalance: 6420, gemBalance: 40, level: 12, xp: 2900, title: "Spring Dancer", blessingTier: "Aero Disciple", streakDays: 12 },
-  { username: "star_drifter", displayName: "Nova Driftwind", avatarUrl: "✨", windBalance: 4180, gemBalance: 22, level: 8, xp: 1850, title: "Star Drifter", blessingTier: "Aero Disciple", streakDays: 7 },
-  { username: "mist_walker", displayName: "Orin Hazewalker", avatarUrl: "🌫️", windBalance: 1950, gemBalance: 12, level: 4, xp: 800, title: "Zephyr Novice", blessingTier: "Aero Disciple", streakDays: 3 },
-];
-
-const RIVAL_WINS = [
-  { username: "storm_archon", gameType: "slots", betWinds: 150, payoutWinds: 7500, details: "Triple 👑 Jackpot" },
-  { username: "gale_dragon", gameType: "cyclone", betWinds: 500, payoutWinds: 4850, details: "Cashed out at 9.70x" },
-  { username: "breeze_witch", gameType: "wheel", betWinds: 250, payoutWinds: 2500, details: "Blessed Hurricane 10x" },
-  { username: "falcon_rider", gameType: "slots", betWinds: 75, payoutWinds: 1875, details: "Triple 💎" },
-  { username: "thunder_monk", gameType: "cyclone", betWinds: 200, payoutWinds: 1240, details: "Cashed out at 6.20x" },
-  { username: "leaf_dancer", gameType: "wheel", betWinds: 100, payoutWinds: 500, details: "Typhoon Blessing 5x" },
-  { username: "star_drifter", gameType: "slots", betWinds: 30, payoutWinds: 300, details: "Triple ⚡" },
-];
-
-let rivalsSeeded = false;
-
-async function ensureRivals() {
-  if (rivalsSeeded) return;
-  const [existing] = await db.select().from(users).where(eq(users.username, "storm_archon")).limit(1);
-  if (!existing) {
-    const inserted = await db
-      .insert(users)
-      .values(RIVAL_PLAYERS.map((r) => ({ ...r, bio: `${r.title} of the Blessed Winds sanctuary.` })))
-      .onConflictDoNothing()
-      .returning();
-    const idByName = new Map(inserted.map((u) => [u.username, u.id]));
-    const winRows = RIVAL_WINS.filter((w) => idByName.has(w.username)).map((w, i) => ({
-      userId: idByName.get(w.username)!,
-      gameType: w.gameType,
-      betWinds: w.betWinds,
-      payoutWinds: w.payoutWinds,
-      netProfit: w.payoutWinds - w.betWinds,
-      score: w.payoutWinds,
-      details: JSON.stringify({ note: w.details }),
-      createdAt: new Date(Date.now() - (i + 1) * 1000 * 60 * 37),
-    }));
-    if (winRows.length) await db.insert(gameSessions).values(winRows);
-  }
-  rivalsSeeded = true;
-}
-
 export async function ensureDefaultUser() {
-  await ensureRivals();
-
   let [user] = await db.select().from(users).where(eq(users.username, DEFAULT_USERNAME)).limit(1);
 
   if (!user) {

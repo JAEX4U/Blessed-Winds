@@ -81,7 +81,7 @@ export default function HomeSection() {
                 { icon: Gamepad2, label: "5 games" },
                 { icon: TrendingUp, label: "Live pot arena" },
                 { icon: ShieldCheck, label: "Play-money only" },
-                { icon: Compass, label: "9 rival riders" },
+                { icon: Compass, label: "Live arena" },
               ].map((chip) => {
                 const ChipIcon = chip.icon;
                 return (

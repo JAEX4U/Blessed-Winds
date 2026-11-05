@@ -329,7 +329,7 @@ export default function LiveSpinGame() {
                         const mid = seg.a0 + (span * (i + 0.5)) / n;
                         const r = n > 3 && i % 2 === 1 ? 88 : 114;
                         const p = polar(160, 160, r, mid);
-                        const isMine = b.userId === user?.id && !b.isBot;
+                        const isMine = b.userId === user?.id;
                         return (
                           <g key={b.id}>
                             {isMine && <circle cx={p.x} cy={p.y} r="12" fill="#020617" opacity="0.55" />}
@@ -530,7 +530,7 @@ export default function LiveSpinGame() {
           <p className="text-[10px] text-slate-500 leading-relaxed flex gap-1.5">
             <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
             Example: you & a rival each put 100 on GREEN, 200 sits on RED. GREEN hits → you each take 200 (half the 400 pot).
-            Bigger color = safer but smaller split. Rival sky-spirits join automatically.
+            Bigger color = safer but smaller split. More players = bigger pots.
           </p>
         </div>
 
@@ -557,7 +557,7 @@ export default function LiveSpinGame() {
                 <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
                   {list.length === 0 && <div className="text-[10px] text-slate-600 italic py-1">No riders yet</div>}
                   {list.map((b) => {
-                    const mine = b.userId === user?.id && !b.isBot;
+                    const mine = b.userId === user?.id;
                     return (
                       <div
                         key={b.id}
