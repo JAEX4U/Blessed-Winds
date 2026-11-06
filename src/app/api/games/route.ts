@@ -3,10 +3,23 @@ import { db } from "@/db";
 import { users, gameSessions, windTransactions, userQuests } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { ensureDefaultUser } from "@/lib/seed";
+import { getSessionCookie, verifySessionToken } from "@/lib/auth";
+
+async function getCurrentUser(request: Request) {
+  const token = await getSessionCookie();
+  if (token) {
+    const payload = verifySessionToken(token);
+    if (payload) {
+      const [user] = await db.select().from(users).where(eq(users.id, payload.userId)).limit(1);
+      if (user) return user;
+    }
+  }
+  return ensureDefaultUser();
+}
 
 export async function POST(request: Request) {
   try {
-    const user = await ensureDefaultUser();
+    const user = await getCurrentUser(request);
     const body = await request.json();
     const { gameType, bet = 0, action, score = 0, clientData } = body;
 

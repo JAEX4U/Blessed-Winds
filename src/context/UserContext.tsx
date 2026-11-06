@@ -20,7 +20,10 @@ interface UserContextType {
   quests: QuestItem[];
   transactions: TransactionItem[];
   isLoading: boolean;
+  isAuthenticated: boolean;
   refreshUser: () => Promise<void>;
+  login: (userData: UserData) => void;
+  logout: () => Promise<void>;
   claimDailyBlessing: () => Promise<{ success: boolean; message: string }>;
   offerFountain: () => Promise<{ success: boolean; message: string; amount?: number }>;
   setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
@@ -32,6 +35,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [quests, setQuests] = useState<QuestItem[]>([]);
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
@@ -46,6 +50,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+        setIsAuthenticated(!!data.authenticated);
         setInventory(data.inventory || []);
         setQuests(data.quests || []);
         setTransactions(data.transactions || []);
@@ -60,6 +65,29 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
+
+  const login = useCallback((userData: UserData) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Logout request failed:", err);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+      setInventory([]);
+      setQuests([]);
+      setTransactions([]);
+      setActiveTabState("home");
+      if (typeof window !== "undefined") {
+        window.location.hash = "#home";
+      }
+    }
+  }, []);
 
   // Keep the active tab and the URL hash in sync, so browser back/forward and
   // shared links land on the right section.
@@ -124,7 +152,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         quests,
         transactions,
         isLoading,
+        isAuthenticated,
         refreshUser,
+        login,
+        logout,
         claimDailyBlessing,
         offerFountain,
         setUser,
