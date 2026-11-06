@@ -126,12 +126,32 @@ function WheelOfGales() {
   const [wheelRotation, setWheelRotation] = useState(0);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
   const [lastWin, setLastWin] = useState<number | null>(null);
-  const [freeSpinsRemaining, setFreeSpinsRemaining] = useState(5);
-  const [paidSpinsRemaining, setPaidSpinsRemaining] = useState(5);
+  const [freeSpinsRemaining, setFreeSpinsRemaining] = useState(0);
+  const [paidSpinsRemaining, setPaidSpinsRemaining] = useState(0);
 
   const PAID_SPIN_COST = 150;
   const MAX_FREE_SPINS = 5;
   const MAX_PAID_SPINS = 5;
+
+  // Sync spin counts from user data whenever it changes
+  useEffect(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const spinsDate = user.wheelSpinsDate ? new Date(user.wheelSpinsDate) : null;
+
+    const isNewDay =
+      !spinsDate ||
+      spinsDate.getFullYear() !== today.getFullYear() ||
+      spinsDate.getMonth() !== today.getMonth() ||
+      spinsDate.getDate() !== today.getDate();
+
+    setFreeSpinsRemaining(
+      isNewDay ? MAX_FREE_SPINS : Math.max(0, MAX_FREE_SPINS - (user.wheelFreeSpinsUsed ?? 0))
+    );
+    setPaidSpinsRemaining(
+      isNewDay ? MAX_PAID_SPINS : Math.max(0, MAX_PAID_SPINS - (user.wheelPaidSpinsUsed ?? 0))
+    );
+  }, [user]);
 
   const freeSegments = [
     { payout: 0, label: "0", color: "from-slate-700 to-slate-800", text: "Calm Breeze (0)", weight: 30 },
@@ -189,8 +209,8 @@ function WheelOfGales() {
       const data = await res.json();
 
       if (!res.ok) {
-        setResultMessage(data.error || "Spin failed");
         setIsSpinning(false);
+        setResultMessage(data.error || "Spin failed");
         return;
       }
 
@@ -204,13 +224,14 @@ function WheelOfGales() {
 
       setWheelRotation(targetDeg);
 
+      // Update spin counts immediately from server response
+      setFreeSpinsRemaining(data.extra?.freeSpinsRemaining ?? 0);
+      setPaidSpinsRemaining(data.extra?.paidSpinsRemaining ?? 0);
+
       setTimeout(async () => {
         setIsSpinning(false);
         setResultMessage(data.message);
         setLastWin(data.payout);
-        // Update remaining spin counts from server response
-        setFreeSpinsRemaining(data.extra?.freeSpinsRemaining ?? 0);
-        setPaidSpinsRemaining(data.extra?.paidSpinsRemaining ?? 0);
         await refreshUser();
 
         const netWin = data.payout - cost;
@@ -229,7 +250,8 @@ function WheelOfGales() {
     }
   };
 
-  const noSpinsLeft = freeSpinsRemaining <= 0 && paidSpinsRemaining <= 0;
+  const noSpinsLeft =
+    spinMode === "free" ? freeSpinsRemaining <= 0 : paidSpinsRemaining <= 0;
 
   // Result badge styling
   const resultBadgeClass = (() => {
