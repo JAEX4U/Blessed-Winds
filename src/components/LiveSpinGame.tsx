@@ -85,7 +85,7 @@ export default function LiveSpinGame() {
   const [amount, setAmount] = useState(100);
   const [placing, setPlacing] = useState(false);
   const [feedback, setFeedback] = useState<{ msg: string; error?: boolean } | null>(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState<number>(0);
   const [rotation, setRotation] = useState(0);
   const [spinTransition, setSpinTransition] = useState<string>("none");
 
@@ -94,6 +94,8 @@ export default function LiveSpinGame() {
   const spunRef = useRef<number | null>(null);
   const celebratedRef = useRef<number | null>(null);
   const paidRefreshRef = useRef<number | null>(null);
+  const nowRef = useRef<number>(0);
+  const rafRef = useRef<number | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -108,14 +110,41 @@ export default function LiveSpinGame() {
     }
   }, []);
 
+  // Countdown driven by requestAnimationFrame. State only updates when the
+  // whole second changes, avoiding 10fps full re-renders from the old setInterval.
+  useEffect(() => {
+    nowRef.current = Date.now() + offsetRef.current;
+    setNow(nowRef.current);
+
+    let lastSecond = -1;
+    const loop = () => {
+      nowRef.current = Date.now() + offsetRef.current;
+      const second = Math.floor(nowRef.current / 1000);
+      if (second !== lastSecond && state) {
+        lastSecond = second;
+        const round = state.round;
+        const bettingLeft = round
+          ? Math.max(0, new Date(round.bettingEndsAt).getTime() - nowRef.current)
+          : 0;
+        const revealLeft = round?.spinEndsAt
+          ? Math.max(0, new Date(round.spinEndsAt).getTime() + round.revealMs - nowRef.current)
+          : 0;
+        if (bettingLeft > 0 || revealLeft > 0) {
+          setNow(nowRef.current);
+        }
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [state, offsetRef]);
+
   useEffect(() => {
     load();
-    const poll = setInterval(load, 2000);
-    const tick = setInterval(() => setNow(Date.now() + offsetRef.current), 100);
-    return () => {
-      clearInterval(poll);
-      clearInterval(tick);
-    };
+    const poll = setInterval(load, 3000);
+    return () => clearInterval(poll);
   }, [load]);
 
   // Drive the wheel from authoritative server phases.
@@ -263,9 +292,9 @@ export default function LiveSpinGame() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         {/* ============ WHEEL ============ */}
-        <div className="lg:col-span-5 flex flex-col items-center p-6 rounded-3xl bg-slate-900/60 border border-cyan-500/20">
+        <div className="lg:col-span-5 flex flex-col items-center p-4 lg:p-6 rounded-3xl bg-slate-900/60 border border-cyan-500/20">
           <div className="w-full mb-4">
             <div className="flex items-center justify-between text-xs font-bold mb-1.5">
               <span className="text-slate-400 flex items-center gap-1.5">
@@ -297,7 +326,7 @@ export default function LiveSpinGame() {
 
           <div className="z-20 -mb-4 w-0 h-0 border-l-[13px] border-l-transparent border-r-[13px] border-r-transparent border-t-[24px] border-t-amber-400 drop-shadow-lg" />
 
-          <div className="relative w-full max-w-[340px] aspect-square">
+          <div className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-square mx-auto">
             <svg viewBox="0 0 320 320" className="w-full h-full drop-shadow-2xl" style={{ transform: `rotate(${rotation}deg)`, transition: spinTransition }}>
               <circle cx="160" cy="160" r="158" fill="#020617" />
               <circle cx="160" cy="160" r="155" fill="none" stroke="#22d3ee" strokeOpacity="0.5" strokeWidth="3" />
@@ -329,7 +358,7 @@ export default function LiveSpinGame() {
                         const mid = seg.a0 + (span * (i + 0.5)) / n;
                         const r = n > 3 && i % 2 === 1 ? 88 : 114;
                         const p = polar(160, 160, r, mid);
-                        const isMine = b.userId === user?.id && !b.isBot;
+                        const isMine = b.userId === user?.id;
                         return (
                           <g key={b.id}>
                             {isMine && <circle cx={p.x} cy={p.y} r="12" fill="#020617" opacity="0.55" />}
@@ -415,7 +444,7 @@ export default function LiveSpinGame() {
         </div>
 
         {/* ============ BET PANEL ============ */}
-        <div className="lg:col-span-4 p-6 rounded-3xl bg-slate-950/80 border border-slate-800 space-y-5">
+        <div className="lg:col-span-4 p-4 rounded-3xl bg-slate-950/80 border border-slate-800 space-y-5">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Trophy className="w-5 h-5 text-amber-400" />
@@ -530,12 +559,12 @@ export default function LiveSpinGame() {
           <p className="text-[10px] text-slate-500 leading-relaxed flex gap-1.5">
             <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
             Example: you & a rival each put 100 on GREEN, 200 sits on RED. GREEN hits → you each take 200 (half the 400 pot).
-            Bigger color = safer but smaller split. Rival sky-spirits join automatically.
+            Bigger color = safer but smaller split. More players = bigger pots.
           </p>
         </div>
 
         {/* ============ RIDERS ============ */}
-        <div className="lg:col-span-3 p-5 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4">
+        <div className="lg:col-span-3 p-4 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Users className="w-4 h-4 text-cyan-400" /> Riders & Splits
           </h3>
@@ -557,7 +586,7 @@ export default function LiveSpinGame() {
                 <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
                   {list.length === 0 && <div className="text-[10px] text-slate-600 italic py-1">No riders yet</div>}
                   {list.map((b) => {
-                    const mine = b.userId === user?.id && !b.isBot;
+                    const mine = b.userId === user?.id;
                     return (
                       <div
                         key={b.id}

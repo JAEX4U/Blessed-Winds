@@ -45,6 +45,7 @@ export default function ProfileSection() {
       setIsSaving(false);
       if (res.ok) {
         setUser(data.user);
+        await refreshUser();
         setIsEditing(false);
       }
     } catch {
@@ -85,9 +86,9 @@ export default function ProfileSection() {
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-950 to-sky-950/80 border border-cyan-500/30 p-8 shadow-2xl">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Avatar & Core identity */}
-          <div className="flex items-center space-x-5">
-            <div className="relative">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-slate-900 border-2 border-cyan-400 flex items-center justify-center text-5xl shadow-xl shadow-cyan-500/20">
+            <div className="flex items-center space-x-4 sm:space-x-5">
+              <div className="relative">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-3xl bg-slate-900 border-2 border-cyan-400 flex items-center justify-center text-4xl sm:text-5xl shadow-xl shadow-cyan-500/20">
                 {user?.avatarUrl || "🌪️"}
               </div>
               <div className="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-full bg-cyan-500 text-slate-950 font-black text-xs border border-white">
@@ -223,7 +224,7 @@ export default function ProfileSection() {
       </div>
 
       {/* Profile Section Navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-2">
+      <div className="flex items-center space-x-2 border-b border-slate-800 pb-2 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveTab("overview")}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -268,8 +269,8 @@ export default function ProfileSection() {
 
       {/* Tab: Overview */}
       {activeTab === "overview" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+          <div className="pf-card p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Shield className="w-4 h-4 text-cyan-400" />
               Blessing Tier
@@ -283,7 +284,7 @@ export default function ProfileSection() {
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+          <div className="pf-card p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-emerald-400" />
               Equipped Aura
@@ -299,7 +300,7 @@ export default function ProfileSection() {
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+          <div className="pf-card p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Award className="w-4 h-4 text-purple-400" />
               Equipped Badge
@@ -323,11 +324,11 @@ export default function ProfileSection() {
               Your inventory is empty! Explore the Breeze Bazaar to acquire auras, charms, and pets.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
               {inventory.map((inv) => (
                 <div
                   key={inv.inventoryId}
-                  className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3"
+                  className="pf-card p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3"
                 >
                   <div className="flex items-start justify-between">
                     <div className="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-3xl">
@@ -362,7 +363,7 @@ export default function ProfileSection() {
             return (
               <div
                 key={quest.id}
-                className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="pf-card p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
@@ -414,7 +415,7 @@ export default function ProfileSection() {
 
       {/* Tab: History */}
       {activeTab === "history" && (
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden">
+        <div className="pf-card rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden">
           <div className="p-4 bg-slate-900 border-b border-slate-800 text-xs font-bold text-slate-400 uppercase tracking-wider">
             Recent Wind Ledger Activity
           </div>

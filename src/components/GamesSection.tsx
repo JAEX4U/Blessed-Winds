@@ -40,7 +40,7 @@ export default function GamesSection() {
         </div>
 
         {/* Game Tabs */}
-        <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800">
+        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setSelectedGame("spin")}
             className={`relative px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
@@ -126,12 +126,34 @@ function WheelOfGales() {
   const [wheelRotation, setWheelRotation] = useState(0);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
   const [lastWin, setLastWin] = useState<number | null>(null);
-  const [freeSpinsRemaining, setFreeSpinsRemaining] = useState(5);
-  const [paidSpinsRemaining, setPaidSpinsRemaining] = useState(5);
+  const [freeSpinsRemaining, setFreeSpinsRemaining] = useState(0);
+  const [paidSpinsRemaining, setPaidSpinsRemaining] = useState(0);
 
   const PAID_SPIN_COST = 150;
   const MAX_FREE_SPINS = 5;
   const MAX_PAID_SPINS = 5;
+
+  // Sync spin counts from user data whenever it changes
+  useEffect(() => {
+    if (!user) return;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const spinsDate = user.wheelSpinsDate ? new Date(user.wheelSpinsDate) : null;
+
+    const isNewDay =
+      !spinsDate ||
+      spinsDate.getFullYear() !== today.getFullYear() ||
+      spinsDate.getMonth() !== today.getMonth() ||
+      spinsDate.getDate() !== today.getDate();
+
+    setFreeSpinsRemaining(
+      isNewDay ? MAX_FREE_SPINS : Math.max(0, MAX_FREE_SPINS - (user.wheelFreeSpinsUsed ?? 0))
+    );
+    setPaidSpinsRemaining(
+      isNewDay ? MAX_PAID_SPINS : Math.max(0, MAX_PAID_SPINS - (user.wheelPaidSpinsUsed ?? 0))
+    );
+  }, [user]);
 
   const freeSegments = [
     { payout: 0, label: "0", color: "from-slate-700 to-slate-800", text: "Calm Breeze (0)", weight: 30 },
@@ -189,8 +211,8 @@ function WheelOfGales() {
       const data = await res.json();
 
       if (!res.ok) {
-        setResultMessage(data.error || "Spin failed");
         setIsSpinning(false);
+        setResultMessage(data.error || "Spin failed");
         return;
       }
 
@@ -204,13 +226,14 @@ function WheelOfGales() {
 
       setWheelRotation(targetDeg);
 
+      // Update spin counts immediately from server response
+      setFreeSpinsRemaining(data.extra?.freeSpinsRemaining ?? 0);
+      setPaidSpinsRemaining(data.extra?.paidSpinsRemaining ?? 0);
+
       setTimeout(async () => {
         setIsSpinning(false);
         setResultMessage(data.message);
         setLastWin(data.payout);
-        // Update remaining spin counts from server response
-        setFreeSpinsRemaining(data.extra?.freeSpinsRemaining ?? 0);
-        setPaidSpinsRemaining(data.extra?.paidSpinsRemaining ?? 0);
         await refreshUser();
 
         const netWin = data.payout - cost;
@@ -229,7 +252,8 @@ function WheelOfGales() {
     }
   };
 
-  const noSpinsLeft = freeSpinsRemaining <= 0 && paidSpinsRemaining <= 0;
+  const noSpinsLeft =
+    spinMode === "free" ? freeSpinsRemaining <= 0 : paidSpinsRemaining <= 0;
 
   // Result badge styling
   const resultBadgeClass = (() => {
@@ -246,25 +270,8 @@ function WheelOfGales() {
     ? "Free Spin"
     : `Paid Spin (${PAID_SPIN_COST} WND)`;
 
-  const bottomContent = noSpinsLeft ? (
-    <div className="p-3 rounded-xl bg-rose-900/20 border border-rose-500/30 text-center">
-      <p className="text-xs text-rose-400 font-medium">
-        All spins used today — come back tomorrow!
-      </p>
-    </div>
-  ) : (
-    <button
-      onClick={handleSpin}
-      disabled={isSpinning}
-      className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-black text-base shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-emerald-400 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-    >
-      <RotateCcw className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`} />
-      <span>{spinButtonLabel}</span>
-    </button>
-  );
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/60 p-8 rounded-3xl border border-cyan-500/20">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-4 lg:p-8 rounded-3xl border border-cyan-500/20 bg-slate-900/60">
       {/* Wheel Visual Canvas */}
       <div className="lg:col-span-7 flex flex-col items-center justify-center relative">
         {/* Top Pointer */}
@@ -273,7 +280,7 @@ function WheelOfGales() {
         </div>
 
         {/* Circular Wheel */}
-        <div className="relative w-72 h-72 sm:w-96 sm:h-96 rounded-full p-2 bg-gradient-to-tr from-cyan-500 via-sky-400 to-emerald-400 shadow-2xl shadow-cyan-500/30">
+        <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-72 lg:h-72 rounded-full p-2 bg-gradient-to-tr from-cyan-500 via-sky-400 to-emerald-400 shadow-2xl shadow-cyan-500/30">
           <div
             className="w-full h-full rounded-full bg-slate-950 relative overflow-hidden transition-transform duration-[3500ms] cubic-bezier(0.15, 0.9, 0.2, 1)"
             style={{ transform: `rotate(${wheelRotation}deg)` }}
@@ -292,7 +299,7 @@ function WheelOfGales() {
                     className={`w-full h-full bg-gradient-to-br ${seg.color} border border-cyan-400/20 flex items-start justify-center pt-2`}
                   >
                     <span
-                      className="text-xs sm:text-sm font-black text-white drop-shadow transform -skew-y-[-45deg]"
+                      className="text-[10px] sm:text-xs font-black text-white drop-shadow transform -skew-y-[-45deg] leading-none"
                       style={{ transform: "rotate(22.5deg)" }}
                     >
                       {seg.label}
@@ -303,8 +310,8 @@ function WheelOfGales() {
             })}
 
             {/* Wheel Center Cap */}
-            <div className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-slate-900 border-4 border-cyan-400 flex items-center justify-center shadow-inner">
-              <Wind className="w-7 h-7 text-cyan-300 animate-spin" style={{ animationDuration: "6s" }} />
+            <div className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-slate-900 border-4 border-cyan-400 flex items-center justify-center shadow-inner">
+              <Wind className="w-6 h-6 text-cyan-300 animate-spin" style={{ animationDuration: "6s" }} />
             </div>
           </div>
         </div>
@@ -318,10 +325,22 @@ function WheelOfGales() {
             </span>
           </div>
         )}
+
+        {/* Spin button right under the wheel */}
+        <button
+          onClick={handleSpin}
+          disabled={isSpinning || noSpinsLeft}
+          className="w-full py-3.5 rounded-2xl text-slate-950 font-black text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-6"
+          style={{ background: spinMode === "paid" ? "linear-gradient(90deg, #f59e0b, #d97706)" : "linear-gradient(90deg, #06b6d4, #10b981)" }}
+        >
+          <RotateCcw className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`} />
+          <span>{isSpinning ? "Spinning Gales..." : spinButtonLabel}</span>
+          {noSpinsLeft && <span className="text-[10px] text-rose-400">No spins left</span>}
+        </button>
       </div>
 
       {/* Control Panel */}
-      <div className="lg:col-span-5 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-5 bg-slate-950/80 p-4 lg:p-6 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Disc className="w-5 h-5 text-cyan-400" />
@@ -421,8 +440,6 @@ function WheelOfGales() {
             <span className="text-sky-400 font-bold">50 Winds</span>
           </div>
         </div>
-
-        {bottomContent}
       </div>
     </div>
   );
@@ -531,9 +548,9 @@ function CycloneRush() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/60 p-8 rounded-3xl border border-cyan-500/20">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-4 lg:p-8 rounded-3xl border border-cyan-500/20 bg-slate-900/60">
       {/* Cyclone Visual Display */}
-      <div className="lg:col-span-8 flex flex-col items-center justify-center p-8 bg-slate-950/90 rounded-2xl border border-slate-800 relative overflow-hidden min-h-[360px]">
+      <div className="lg:col-span-8 flex flex-col items-center justify-center p-4 lg:p-8 bg-slate-950/90 rounded-2xl border border-slate-800 relative overflow-hidden min-h-[280px] sm:min-h-[360px]">
         {/* Dynamic Storm Aura Background */}
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
@@ -620,7 +637,7 @@ function CycloneRush() {
       </div>
 
       {/* Crash Bet Panel */}
-      <div className="lg:col-span-4 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-4 bg-slate-950/80 p-4 lg:p-6 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-cyan-400" />
@@ -697,6 +714,14 @@ function TempestSlots() {
   const [reels, setReels] = useState(["🍃", "🌪️", "💎"]);
   const [isRolling, setIsRolling] = useState(false);
   const [resultMsg, setResultMsg] = useState<string | null>(null);
+  const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Clean up any running interval on unmount
+  useEffect(() => {
+    return () => {
+      if (rollIntervalRef.current) clearInterval(rollIntervalRef.current);
+    };
+  }, []);
 
   const symbols = ["🍃", "🪶", "⚡", "🌪️", "💎", "👑"];
 
@@ -711,7 +736,7 @@ function TempestSlots() {
     setResultMsg(null);
 
     // Reel rolling animation
-    const rollInterval = setInterval(() => {
+    rollIntervalRef.current = setInterval(() => {
       setReels([
         symbols[Math.floor(Math.random() * symbols.length)],
         symbols[Math.floor(Math.random() * symbols.length)],
@@ -728,7 +753,8 @@ function TempestSlots() {
       const data = await res.json();
 
       setTimeout(async () => {
-        clearInterval(rollInterval);
+        if (rollIntervalRef.current) clearInterval(rollIntervalRef.current);
+        rollIntervalRef.current = null;
         setIsRolling(false);
         if (res.ok) {
           setReels(data.extra?.grid || ["🍃", "🍃", "🍃"]);
@@ -747,16 +773,17 @@ function TempestSlots() {
         }
       }, 1500);
     } catch {
-      clearInterval(rollInterval);
+      if (rollIntervalRef.current) clearInterval(rollIntervalRef.current);
+      rollIntervalRef.current = null;
       setIsRolling(false);
       setResultMsg("Slot network error.");
     }
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/60 p-8 rounded-3xl border border-cyan-500/20">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-4 lg:p-8 rounded-3xl border border-cyan-500/20 bg-slate-900/60">
       {/* Slots Machine Display */}
-      <div className="lg:col-span-8 flex flex-col items-center justify-center p-8 bg-slate-950/90 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-8 flex flex-col items-center justify-center p-4 lg:p-8 bg-slate-950/90 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
           <Sparkles className="w-4 h-4" />
           <span>Three-Reel Blessed Winds Matrix</span>
@@ -796,7 +823,7 @@ function TempestSlots() {
       </div>
 
       {/* Control Panel */}
-      <div className="lg:col-span-4 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-4 bg-slate-950/80 p-4 lg:p-6 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-400" />
@@ -940,7 +967,7 @@ function ZephyrHarvester() {
       </div>
 
       {/* Control Panel */}
-      <div className="lg:col-span-4 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="lg:col-span-4 bg-slate-950/80 p-4 lg:p-6 rounded-2xl border border-slate-800 space-y-5 lg:space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Zap className="w-5 h-5 text-emerald-400" />

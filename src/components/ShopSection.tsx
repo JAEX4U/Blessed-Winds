@@ -135,14 +135,14 @@ export default function ShopSection() {
 
         {/* Current Balances Pill */}
         <div className="flex items-center space-x-3">
-          <div className="px-4 py-2 rounded-xl bg-slate-900 border border-cyan-500/30 flex items-center space-x-2">
-            <Wind className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs text-slate-400 font-medium">Your Winds:</span>
+          <div className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-slate-900 border border-cyan-500/30 flex items-center space-x-1.5 sm:space-x-2">
+            <Wind className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
+            <span className="text-[10px] sm:text-xs text-slate-400 font-medium">Your Winds:</span>
             <span className="text-sm font-black text-cyan-300">{(user?.windBalance ?? 0).toLocaleString()}</span>
           </div>
-          <div className="px-4 py-2 rounded-xl bg-slate-900 border border-purple-500/30 flex items-center space-x-2">
-            <Gem className="w-4 h-4 text-purple-400" />
-            <span className="text-xs text-slate-400 font-medium">Gems:</span>
+          <div className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-slate-900 border border-purple-500/30 flex items-center space-x-1.5 sm:space-x-2">
+            <Gem className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" />
+            <span className="text-[10px] sm:text-xs text-slate-400 font-medium">Gems:</span>
             <span className="text-sm font-black text-purple-300">{user?.gemBalance ?? 0}</span>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function ShopSection() {
       </div>
 
       {/* Shop Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         {filteredItems.map((item) => {
           const owned = inventory.find((inv) => inv.itemId === item.id);
           const isEquipped = owned?.isEquipped || false;
@@ -178,7 +178,7 @@ export default function ShopSection() {
           return (
             <div
               key={item.id}
-              className="group relative rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/40 p-6 flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-cyan-950/20"
+              className="pf-card pf-card-hover pf-card-lift group relative rounded-2xl border border-slate-800 hover:border-cyan-500/40 p-6 flex flex-col justify-between transition-all"
             >
               {/* Item Card Header */}
               <div>

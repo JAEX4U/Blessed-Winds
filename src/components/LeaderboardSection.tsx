@@ -194,7 +194,7 @@ export default function LeaderboardSection() {
       {/* Your rank cards */}
       {data && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-cyan-950/60 to-slate-900 border border-cyan-500/30 flex items-center gap-4">
+          <div className="pf-card p-5 rounded-2xl bg-gradient-to-br from-cyan-950/60 to-slate-900 border border-cyan-500/30 flex items-center gap-4">
             <div className="text-4xl">{user?.avatarUrl || "🌪️"}</div>
             <div>
               <div className="text-[10px] uppercase tracking-wider font-bold text-cyan-400">Your Winds Rank</div>
@@ -203,7 +203,7 @@ export default function LeaderboardSection() {
               </div>
             </div>
           </div>
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-950/50 to-slate-900 border border-purple-500/30 flex items-center gap-4">
+          <div className="pf-card p-5 rounded-2xl bg-gradient-to-br from-purple-950/50 to-slate-900 border border-purple-500/30 flex items-center gap-4">
             <div className="p-3 rounded-xl bg-purple-500/15 text-purple-300">
               <Star className="w-6 h-6" />
             </div>
@@ -216,7 +216,7 @@ export default function LeaderboardSection() {
           </div>
           <button
             onClick={() => setActiveTab("games")}
-            className="p-5 rounded-2xl bg-gradient-to-br from-emerald-600/80 to-cyan-600/80 hover:from-emerald-500 hover:to-cyan-500 border border-emerald-400/40 flex items-center gap-4 text-left transition-all hover:scale-[1.02]"
+            className="pf-card pf-card-hover pf-card-lift p-5 rounded-2xl bg-gradient-to-br from-emerald-600/80 to-cyan-600/80 border border-emerald-400/40 flex items-center gap-4 text-left transition-all"
           >
             <div className="p-3 rounded-xl bg-slate-950/30 text-white">
               <Gamepad2 className="w-6 h-6" />
@@ -230,7 +230,7 @@ export default function LeaderboardSection() {
       )}
 
       {/* Board tabs */}
-      <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 w-fit">
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 overflow-x-auto scrollbar-none">
         {boards.map((b) => {
           const Icon = b.icon;
           return (
@@ -295,7 +295,7 @@ export default function LeaderboardSection() {
           )}
 
           {/* Ranked list */}
-          <div className="rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden">
+          <div className="pf-card rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden">
             <div className="grid grid-cols-12 px-4 py-3 bg-slate-900 border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500">
               <div className="col-span-1">#</div>
               <div className="col-span-7 sm:col-span-6">Player</div>
@@ -343,7 +343,7 @@ export default function LeaderboardSection() {
 
         {/* Live wins feed */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="rounded-2xl bg-slate-900/70 border border-slate-800 overflow-hidden">
+          <div className="pf-card rounded-2xl bg-slate-900/70 border border-slate-800 overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
               <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
@@ -375,7 +375,7 @@ export default function LeaderboardSection() {
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-950/40 to-slate-900 border border-amber-500/30 space-y-2">
+          <div className="pf-card p-5 rounded-2xl bg-gradient-to-br from-amber-950/40 to-slate-900 border border-amber-500/30 space-y-2">
             <div className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-2">
               <Zap className="w-4 h-4" /> Season Rewards
             </div>

@@ -3,7 +3,7 @@ import { randomInt } from "crypto";
 import { db } from "@/db";
 import { users, spinRounds, spinBets, windTransactions, gameSessions } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
-import { ensureDefaultUser, RIVAL_PLAYERS } from "@/lib/seed";
+import { ensureDefaultUser } from "@/lib/seed";
 
 export const dynamic = "force-dynamic";
 
@@ -104,7 +104,7 @@ async function advanceRound(): Promise<Round> {
       const top = [...winners].sort(
         (a, b) => (alloc.get(b.id) ?? 0) - (alloc.get(a.id) ?? 0) || a.id - b.id
       )[0];
-      const riderKeys = new Set(winners.map((b) => (b.isBot ? `bot-${b.playerName}` : `u-${b.userId}`)));
+      const riderKeys = new Set(winners.filter((b) => b.userId).map((b) => b.userId));
 
       const [spinning] = await tx
         .update(spinRounds)
@@ -194,44 +194,8 @@ async function advanceRound(): Promise<Round> {
   return round;
 }
 
-/** Rival sky-spirits trickle into the arena so rounds feel alive. */
-async function maybeAddBot(round: Round) {
-  if (round.status !== "betting") return;
-  const now = Date.now();
-  const startedAt = new Date(round.bettingEndsAt).getTime() - BETTING_MS;
-  const elapsed = now - startedAt;
-  if (elapsed < 2500 || now > new Date(round.bettingEndsAt).getTime() - 4000) return;
-
-  const bets = await db.select().from(spinBets).where(eq(spinBets.roundId, round.id));
-  const bots = bets.filter((b) => b.isBot);
-  if (bots.length >= 7) return;
-  const lastBetAt = bets.length ? Math.max(...bets.map((b) => new Date(b.createdAt).getTime())) : 0;
-  if (bots.length > 0 && now - lastBetAt < 2600) return;
-  if (bots.length > 0 && Math.random() > 0.8) return;
-
-  const rival = RIVAL_PLAYERS[randomInt(0, RIVAL_PLAYERS.length)];
-  const amounts = [25, 50, 75, 100, 100, 150, 200, 300];
-  const amount = amounts[randomInt(0, amounts.length)];
-  const color = COLORS[randomInt(0, COLORS.length)];
-
-  await db.insert(spinBets).values({
-    roundId: round.id,
-    userId: null,
-    playerName: rival.displayName,
-    avatar: rival.avatarUrl,
-    color,
-    amount,
-    isBot: true,
-  });
-  await db
-    .update(spinRounds)
-    .set({ totalPot: sql`${spinRounds.totalPot} + ${amount}` })
-    .where(eq(spinRounds.id, round.id));
-}
-
 async function buildState(meId: number) {
   const round = await advanceRound();
-  await maybeAddBot(round);
 
   const [fresh] = await db.select().from(spinRounds).where(eq(spinRounds.id, round.id));
   const bets = orderedBets(await db.select().from(spinBets).where(eq(spinBets.roundId, fresh.id)));
@@ -262,9 +226,7 @@ async function buildState(meId: number) {
       : 0;
 
   const colorStats = COLORS.map((c) => {
-    const riders = new Set(
-      bets.filter((b) => b.color === c).map((b) => (b.isBot ? `bot-${b.playerName}` : `u-${b.userId}`))
-    ).size;
+    const riders = new Set(bets.filter((b) => b.color === c && b.userId).map((b) => b.userId)).size;
     return {
       color: c,
       total: totals[c],
@@ -309,7 +271,7 @@ async function buildState(meId: number) {
     })),
     colorTotals: totals,
     colorStats,
-    playersCount: new Set(bets.map((b) => (b.isBot ? `bot-${b.playerName}` : `u-${b.userId}`))).size,
+    playersCount: new Set(bets.filter((b) => b.userId).map((b) => b.userId)).size,
     myTotal,
     myByColor,
     myChance,

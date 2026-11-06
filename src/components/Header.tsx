@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useUser } from "@/context/UserContext";
 import type { TabId } from "@/context/UserContext";
 import {
@@ -28,6 +28,7 @@ export default function Header() {
   const [dailyStatus, setDailyStatus] = useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const lastConfettiRef = useRef(0);
 
   const handleDailyClick = async () => {
     setIsClaiming(true);
@@ -35,27 +36,32 @@ export default function Header() {
     setIsClaiming(false);
     setDailyStatus(result.message);
     if (result.success) {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.2 },
-        colors: ["#38bdf8", "#34d399", "#fbbf24", "#a855f7"],
-      });
+      // Debounce confetti: max once per 2 seconds to avoid canvas spam
+      const now = Date.now();
+      if (now - lastConfettiRef.current > 2000) {
+        lastConfettiRef.current = now;
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.2 },
+          colors: ["#38bdf8", "#34d399", "#fbbf24", "#a855f7"],
+        });
+      }
     }
     setTimeout(() => setDailyStatus(null), 5000);
   };
 
   const navItems = [
-    { id: "home", label: "Sanctuary", icon: Wind },
-    { id: "games", label: "Wind Games", icon: Gamepad2 },
+    { id: "home", label: "Home", icon: Wind },
+    { id: "games", label: "Games", icon: Gamepad2 },
     { id: "shop", label: "Shop", icon: ShoppingBag },
     { id: "leaderboard", label: "Leaderboard", icon: Trophy },
-    { id: "profile", label: "My Profile", icon: User },
-    { id: "faq", label: "FAQ & Lore", icon: HelpCircle },
+    { id: "profile", label: "Profile", icon: User },
+    { id: "faq", label: "FAQ", icon: HelpCircle },
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-sky-500/15 bg-abyss-950/75 shadow-[0_18px_40px_-30px_rgba(8,145,178,0.8)] backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-sky-500/15 bg-abyss-950/90 shadow-[0_18px_40px_-30px_rgba(8,145,178,0.8)] backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo & Brand */}
@@ -78,7 +84,7 @@ export default function Header() {
                 </span>
               </div>
               <p className="text-xs text-sky-300/60 font-medium tracking-wide">
-                Gather Winds • Ride The Gales • Ascend
+                Free-to-Play Wind Games
               </p>
             </div>
           </div>
@@ -93,7 +99,7 @@ export default function Header() {
                   key={item.id}
                   onClick={() => setActiveTab(item.id as TabId)}
                   aria-current={isActive ? "page" : undefined}
-                  className={`relative flex items-center space-x-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all duration-200 ${
+                  className={`relative flex items-center space-x-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all duration-200 pf-card-hover ${
                     isActive
                       ? "bg-gradient-to-r from-sky-500/20 to-cyan-500/30 text-cyan-300 border border-cyan-400/30 shadow-md shadow-cyan-500/10"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/60"
@@ -120,9 +126,9 @@ export default function Header() {
               <div className="p-1 rounded-lg bg-cyan-500/20 text-cyan-400">
                 <Wind className="w-4 h-4 animate-spin" style={{ animationDuration: "8s" }} />
               </div>
-              <div className="text-left">
+                <div className="text-left">
                 <div className="text-[10px] text-cyan-300/70 font-semibold uppercase tracking-wider">
-                  Winds Balance
+                  Balance
                 </div>
                 <div className="text-sm font-extrabold text-cyan-200 flex items-center space-x-1">
                   <span>{(user?.windBalance ?? 0).toLocaleString()}</span>
@@ -161,7 +167,7 @@ export default function Header() {
               title="Claim your Daily Blessed Winds"
             >
               <Sparkles className="w-4 h-4 text-slate-950 fill-amber-300 animate-pulse" />
-              <span>{isClaiming ? "Invoking..." : "Daily Gift"}</span>
+              <span>{isClaiming ? "Claiming..." : "Daily Gift"}</span>
             </button>
           </div>
 
@@ -219,7 +225,7 @@ export default function Header() {
             className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 text-slate-950 font-bold text-sm flex items-center justify-center space-x-2"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Claim Daily Winds Blessing</span>
+            <span>Daily Gift</span>
           </button>
 
           <div className="space-y-1 pt-2">
