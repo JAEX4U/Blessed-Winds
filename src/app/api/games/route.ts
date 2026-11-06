@@ -91,13 +91,13 @@ export async function POST(request: Request) {
       ];
 
       const paidSegments = [
-        { payout: 0, label: "Calm Breeze (0)", weight: 15 },
+        { payout: 0, label: "Calm Breeze (0)", weight: 19 },
         { payout: 50, label: "Gentle Breeze (50)", weight: 20 },
         { payout: 100, label: "Brisk Draft (100)", weight: 22 },
         { payout: 200, label: "Gale Gust (200)", weight: 18 },
         { payout: 500, label: "Storm Surge (500)", weight: 12 },
         { payout: 800, label: "Typhoon Blessing (800)", weight: 8 },
-        { payout: 3000, label: "BLESSED HURRICANE (3000)!", weight: 5 },
+        { payout: 3000, label: "BLESSED HURRICANE (3000)!", weight: 1 },
       ];
 
       const segments = isPaid ? paidSegments : freeSegments;
