@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useUser } from "@/context/UserContext";
+import { useUser, UserProvider } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
 import { Wind, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const { login, isAuthenticated } = useUser();
   const router = useRouter();
   const [captcha, setCaptcha] = useState<{ key: string; question: string } | null>(null);
   const [captchaAnswer, setCaptchaAnswer] = useState("");
-const [usernameOrEmail, setUsernameOrEmail] = useState("");
-const [password, setPassword] = useState("");
-const [error, setError] = useState("");
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if already authenticated
@@ -189,5 +189,13 @@ const [error, setError] = useState("");
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <UserProvider>
+      <LoginPageContent />
+    </UserProvider>
   );
 }

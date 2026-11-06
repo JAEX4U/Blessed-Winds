@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useUser } from "@/context/UserContext";
+import { useUser, UserProvider } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
 import { Wind, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const { login, isAuthenticated } = useUser();
   const router = useRouter();
   const [captcha, setCaptcha] = useState<{ key: string; question: string } | null>(null);
@@ -254,5 +254,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <UserProvider>
+      <RegisterPageContent />
+    </UserProvider>
   );
 }
