@@ -35,7 +35,45 @@ function RegisterPageContent() {
       .catch(() => setError("Failed to load security challenge"));
   }, []);
 
-  // Render Turnstile widget when site key is available
+  const pendingSubmitRef = useRef(false);
+
+  const handleSubmitImpl = async () => {
+    if (!turnstileToken) {
+      setError("Please complete the security verification.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+          turnstileToken,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Registration failed. Please try again.");
+        setTurnstileToken("");
+        return;
+      }
+
+      login(data.user);
+      router.push("/");
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Render Turnstile widget when site key and the turnstile global are available
   useEffect(() => {
     if (!captchaSiteKey || !turnstileRef.current) return;
 
@@ -48,13 +86,19 @@ function RegisterPageContent() {
       size: "invisible",
       callback: (token: string) => {
         setTurnstileToken(token);
+        if (pendingSubmitRef.current) {
+          pendingSubmitRef.current = false;
+          handleSubmitImpl();
+        }
       },
       "error-callback": () => {
         setTurnstileToken("");
         setError("Captcha verification failed. Please try again.");
+        pendingSubmitRef.current = false;
       },
       "expired-callback": () => {
         setTurnstileToken("");
+        pendingSubmitRef.current = false;
       },
     });
   }, [captchaSiteKey]);
@@ -92,6 +136,7 @@ function RegisterPageContent() {
     // Execute Turnstile to get a token
     // @ts-expect-error - Turnstile global
     if (widgetIdRef.current && typeof window.turnstile !== "undefined") {
+      pendingSubmitRef.current = true;
       // @ts-expect-error - Turnstile execute API
       window.turnstile.execute(widgetIdRef.current);
       return;
@@ -102,34 +147,7 @@ function RegisterPageContent() {
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-          turnstileToken,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Registration failed. Please try again.");
-        setTurnstileToken("");
-        return;
-      }
-
-      login(data.user);
-      router.push("/");
-    } catch {
-      setError("Network error. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    await handleSubmitImpl();
   };
 
   const handleGoogleSignIn = () => {
@@ -155,7 +173,7 @@ function RegisterPageContent() {
         {/* Turnstile script */}
         {captchaSiteKey && (
           <Script
-            src={`https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=turnstileRender`}
+            src={`https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit`}
             strategy="afterInteractive"
           />
         )}

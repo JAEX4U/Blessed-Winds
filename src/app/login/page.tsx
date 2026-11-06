@@ -33,43 +33,9 @@ function LoginPageContent() {
       .catch(() => setError("Failed to load security challenge"));
   }, []);
 
-  // Render Turnstile widget when site key is available
-  useEffect(() => {
-    if (!captchaSiteKey || !turnstileRef.current) return;
+  const pendingSubmitRef = useRef(false);
 
-    // @ts-expect-error - Turnstile global from Cloudflare script
-    if (typeof window.turnstile === "undefined") return;
-
-    // Render widget explicitly
-    // @ts-expect-error - Turnstile render API
-    widgetIdRef.current = window.turnstile.render(turnstileRef.current!, {
-      sitekey: captchaSiteKey,
-      size: "invisible",
-      callback: (token: string) => {
-        setTurnstileToken(token);
-      },
-      "error-callback": () => {
-        setTurnstileToken("");
-        setError("Captcha verification failed. Please try again.");
-      },
-      "expired-callback": () => {
-        setTurnstileToken("");
-      },
-    });
-  }, [captchaSiteKey]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    // Execute Turnstile to get a token
-    // @ts-expect-error - Turnstile global
-    if (widgetIdRef.current && typeof window.turnstile !== "undefined") {
-      // @ts-expect-error - Turnstile execute API
-      window.turnstile.execute(widgetIdRef.current);
-      return; // Wait for callback to set token, then submit
-    }
-
+  const handleSubmitImpl = async () => {
     if (!turnstileToken) {
       setError("Please complete the security verification.");
       return;
@@ -105,6 +71,59 @@ function LoginPageContent() {
     }
   };
 
+  // Render Turnstile widget when site key and the turnstile global are available
+  useEffect(() => {
+    if (!captchaSiteKey || !turnstileRef.current) return;
+
+    // @ts-expect-error - Turnstile global from Cloudflare script
+    if (typeof window.turnstile === "undefined") return;
+
+    // Render widget explicitly
+    // @ts-expect-error - Turnstile render API
+    widgetIdRef.current = window.turnstile.render(turnstileRef.current!, {
+      sitekey: captchaSiteKey,
+      size: "invisible",
+      callback: (token: string) => {
+        setTurnstileToken(token);
+        // Auto-submit if a submit was pending while waiting for captcha
+        if (pendingSubmitRef.current) {
+          pendingSubmitRef.current = false;
+          handleSubmitImpl();
+        }
+      },
+      "error-callback": () => {
+        setTurnstileToken("");
+        setError("Captcha verification failed. Please try again.");
+        pendingSubmitRef.current = false;
+      },
+      "expired-callback": () => {
+        setTurnstileToken("");
+        pendingSubmitRef.current = false;
+      },
+    });
+  }, [captchaSiteKey]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    // Execute Turnstile to get a token
+    // @ts-expect-error - Turnstile global
+    if (widgetIdRef.current && typeof window.turnstile !== "undefined") {
+      pendingSubmitRef.current = true;
+      // @ts-expect-error - Turnstile execute API
+      window.turnstile.execute(widgetIdRef.current);
+      return; // Wait for callback to auto-submit
+    }
+
+    if (!turnstileToken) {
+      setError("Please complete the security verification.");
+      return;
+    }
+
+    await handleSubmitImpl();
+  };
+
   const handleGoogleSignIn = () => {
     router.push("/api/auth/google/start");
   };
@@ -128,7 +147,7 @@ function LoginPageContent() {
         {/* Turnstile script */}
         {captchaSiteKey && (
           <Script
-            src={`https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=turnstileRender`}
+            src={`https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit`}
             strategy="afterInteractive"
           />
         )}
