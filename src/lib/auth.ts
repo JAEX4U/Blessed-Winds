@@ -58,7 +58,10 @@ export async function clearSessionCookie(): Promise<void> {
   });
 }
 
-// Simple math captcha: generates a question and answer
+/**
+ * Cookie-based math captcha: stores the answer in a client-side cookie
+ * so it works across Vercel serverless instances (no in-memory store needed).
+ */
 export function generateCaptcha(): { question: string; answer: number } {
   const a = Math.floor(Math.random() * 10) + 1;
   const b = Math.floor(Math.random() * 10) + 1;
@@ -68,24 +71,40 @@ export function generateCaptcha(): { question: string; answer: number } {
   };
 }
 
-// Store captcha answers temporarily (in-memory, keyed by session/IP)
-// In production, use Redis or a proper store
-const captchaStore = new Map<string, { answer: number; expiresAt: number }>();
-
-export function setCaptchaAnswer(key: string, answer: number): void {
-  captchaStore.set(key, { answer, expiresAt: Date.now() + 5 * 60 * 1000 }); // 5 min
+export async function setCaptchaCookie(answer: number): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set("bw_captcha", String(answer), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 5 * 60, // 5 minutes
+    path: "/",
+  });
 }
 
-export function verifyCaptchaAnswer(key: string, answer: number): boolean {
-  const entry = captchaStore.get(key);
-  if (!entry || entry.expiresAt < Date.now()) return false;
-  captchaStore.delete(key);
-  return entry.answer === answer;
+export async function verifyCaptchaCookie(answer: number): Promise<boolean> {
+  const cookieStore = await cookies();
+  const stored = cookieStore.get("bw_captcha")?.value;
+  if (!stored) return false;
+  const match = parseInt(stored, 10) === answer;
+  // Clear the captcha cookie after verification (success or failure)
+  cookieStore.set("bw_captcha", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
+  return match;
 }
 
-export function getCaptchaKey(reqHeaders: Headers): string {
-  // Use a combination of headers as a simple fingerprint
-  const forwarded = reqHeaders.get("x-forwarded-for");
-  const ua = reqHeaders.get("user-agent");
-  return `captcha:${forwarded ?? "unknown"}:${ua ?? "unknown"}`;
+export async function clearCaptchaCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set("bw_captcha", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
 }

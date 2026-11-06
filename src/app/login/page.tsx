@@ -53,7 +53,6 @@ function LoginPageContent() {
         body: JSON.stringify({
           usernameOrEmail,
           password,
-          captchaKey: captcha.key,
           captchaAnswer: answer,
         }),
       });

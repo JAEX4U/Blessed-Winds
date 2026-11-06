@@ -82,7 +82,6 @@ function RegisterPageContent() {
           username,
           email,
           password,
-          captchaKey: captcha.key,
           captchaAnswer: answer,
         }),
       });

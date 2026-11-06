@@ -6,16 +6,13 @@ import {
   hashPassword,
   createSessionToken,
   setSessionCookie,
-  generateCaptcha,
-  setCaptchaAnswer,
-  getCaptchaKey,
-  verifyCaptchaAnswer,
+  verifyCaptchaCookie,
 } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { username, email, password, captchaKey, captchaAnswer } = body;
+    const { username, email, password, captchaAnswer } = body;
 
     // Validate required fields
     if (!username || !email || !password) {
@@ -32,15 +29,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify captcha
-    if (!captchaKey || !captchaAnswer) {
-      return NextResponse.json(
-        { error: "Captcha verification required" },
-        { status: 400 }
-      );
-    }
-
-    if (!verifyCaptchaAnswer(captchaKey, captchaAnswer)) {
+    // Verify captcha (cookie-based, works across serverless instances)
+    const answer = parseInt(String(captchaAnswer), 10);
+    if (isNaN(answer) || !(await verifyCaptchaCookie(answer))) {
       return NextResponse.json(
         { error: "Invalid or expired captcha" },
         { status: 400 }

@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { generateCaptcha, setCaptchaAnswer, getCaptchaKey } from "@/lib/auth";
+import { generateCaptcha, setCaptchaCookie } from "@/lib/auth";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const captcha = generateCaptcha();
-    const key = getCaptchaKey(request.headers);
-    setCaptchaAnswer(key, captcha.answer);
+    await setCaptchaCookie(captcha.answer);
 
     return NextResponse.json({
-      key,
       question: captcha.question,
     });
   } catch (error) {
