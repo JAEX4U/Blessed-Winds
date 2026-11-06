@@ -1,11 +1,28 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
+import { db, pool } from "@/db";
 import { users, userInventory, shopItems, userQuests, windTransactions, gameSessions } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { ensureDefaultUser } from "@/lib/seed";
 import { getSessionCookie, verifySessionToken } from "@/lib/auth";
 
+async function ensureAuthColumns() {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS email TEXT UNIQUE,
+        ADD COLUMN IF NOT EXISTS password_hash TEXT,
+        ADD COLUMN IF NOT EXISTS auth_provider TEXT DEFAULT 'credentials',
+        ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS is_anonymous BOOLEAN DEFAULT FALSE;
+    `);
+  } finally {
+    client.release();
+  }
+}
+
 async function getCurrentUser(request: Request) {
+  await ensureAuthColumns();
   const token = await getSessionCookie();
   if (token) {
     const payload = verifySessionToken(token);
