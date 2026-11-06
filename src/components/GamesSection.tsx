@@ -135,6 +135,8 @@ function WheelOfGales() {
 
   // Sync spin counts from user data whenever it changes
   useEffect(() => {
+    if (!user) return;
+
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const spinsDate = user.wheelSpinsDate ? new Date(user.wheelSpinsDate) : null;
