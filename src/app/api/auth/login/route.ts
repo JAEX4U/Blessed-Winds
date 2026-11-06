@@ -6,13 +6,28 @@ import {
   verifyPassword,
   createSessionToken,
   setSessionCookie,
-  verifyCaptchaCookie,
 } from "@/lib/auth";
+
+async function verifyTurnstile(token: string): Promise<boolean> {
+  const verifyResponse = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        secret: process.env.TURNSTILE_SECRET_KEY!,
+        response: token,
+      }),
+    }
+  );
+  const result = await verifyResponse.json();
+  return result.success === true;
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { usernameOrEmail, password, captchaAnswer } = body;
+    const { usernameOrEmail, password, turnstileToken } = body;
 
     // Validate required fields
     if (!usernameOrEmail || !password) {
@@ -22,9 +37,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify captcha (cookie-based, works across serverless instances)
-    const answer = parseInt(String(captchaAnswer), 10);
-    if (isNaN(answer) || !(await verifyCaptchaCookie(answer))) {
+    // Verify Turnstile captcha
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: "Captcha verification required" },
+        { status: 400 }
+      );
+    }
+
+    if (!(await verifyTurnstile(turnstileToken))) {
       return NextResponse.json(
         { error: "Invalid or expired captcha" },
         { status: 400 }
@@ -51,14 +72,17 @@ export async function POST(request: Request) {
           { status: 401 }
         );
       }
-      // Found by email - but check if it has a password
+      // Found by email - check if it has a password
       if (!emailUser.passwordHash) {
         return NextResponse.json(
           { error: "Account uses a different sign-in method" },
           { status: 401 }
         );
       }
-      const passwordValid = await verifyPassword(password, emailUser.passwordHash);
+      const passwordValid = await verifyPassword(
+        password,
+        emailUser.passwordHash
+      );
       if (!passwordValid) {
         return NextResponse.json(
           { error: "Invalid username/email or password" },

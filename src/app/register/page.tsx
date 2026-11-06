@@ -1,21 +1,24 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useUser, UserProvider } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
 import { Wind, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react";
+import Script from "next/script";
 
 function RegisterPageContent() {
   const { login, isAuthenticated } = useUser();
   const router = useRouter();
-  const [captcha, setCaptcha] = useState<{ key: string; question: string } | null>(null);
-  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<number | null>(null);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -24,22 +27,41 @@ function RegisterPageContent() {
     }
   }, [isAuthenticated, router]);
 
-  // Fetch captcha on mount
+  // Fetch Turnstile site key on mount
   useEffect(() => {
     fetch("/api/auth/captcha")
       .then((res) => res.json())
-      .then((data) => setCaptcha(data))
+      .then((data) => setCaptchaSiteKey(data.siteKey))
       .catch(() => setError("Failed to load security challenge"));
   }, []);
+
+  // Render Turnstile widget when site key is available
+  useEffect(() => {
+    if (!captchaSiteKey || !turnstileRef.current) return;
+
+    // @ts-expect-error - Turnstile global from Cloudflare script
+    if (typeof window.turnstile === "undefined") return;
+
+    // @ts-expect-error - Turnstile render API
+    widgetIdRef.current = window.turnstile.render(turnstileRef.current!, {
+      sitekey: captchaSiteKey,
+      size: "invisible",
+      callback: (token: string) => {
+        setTurnstileToken(token);
+      },
+      "error-callback": () => {
+        setTurnstileToken("");
+        setError("Captcha verification failed. Please try again.");
+      },
+      "expired-callback": () => {
+        setTurnstileToken("");
+      },
+    });
+  }, [captchaSiteKey]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    if (!captcha) {
-      setError("Security challenge not loaded. Please refresh.");
-      return;
-    }
 
     if (!username || !email || !password || !confirmPassword) {
       setError("All fields are required.");
@@ -67,13 +89,20 @@ function RegisterPageContent() {
       return;
     }
 
-    try {
-      const answer = parseInt(captchaAnswer, 10);
-      if (isNaN(answer)) {
-        setError("Please answer the security question.");
-        return;
-      }
+    // Execute Turnstile to get a token
+    // @ts-expect-error - Turnstile global
+    if (widgetIdRef.current && typeof window.turnstile !== "undefined") {
+      // @ts-expect-error - Turnstile execute API
+      window.turnstile.execute(widgetIdRef.current);
+      return;
+    }
 
+    if (!turnstileToken) {
+      setError("Please complete the security verification.");
+      return;
+    }
+
+    try {
       setIsSubmitting(true);
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -82,7 +111,7 @@ function RegisterPageContent() {
           username,
           email,
           password,
-          captchaAnswer: answer,
+          turnstileToken,
         }),
       });
 
@@ -90,11 +119,7 @@ function RegisterPageContent() {
 
       if (!res.ok) {
         setError(data.error || "Registration failed. Please try again.");
-        // Refresh captcha after failed attempt
-        fetch("/api/auth/captcha")
-          .then((r) => r.json())
-          .then((d) => setCaptcha(d));
-        setCaptchaAnswer("");
+        setTurnstileToken("");
         return;
       }
 
@@ -105,6 +130,10 @@ function RegisterPageContent() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    router.push("/api/auth/google/start");
   };
 
   return (
@@ -123,12 +152,25 @@ function RegisterPageContent() {
           </div>
         </div>
 
+        {/* Turnstile script */}
+        {captchaSiteKey && (
+          <Script
+            src={`https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=turnstileRender`}
+            strategy="afterInteractive"
+          />
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-5 bg-slate-900/60 border border-slate-700/50 p-6 rounded-3xl shadow-2xl shadow-slate-900/50 backdrop-blur-xl">
           {error && (
             <div className="rounded-xl bg-rose-500/10 border border-rose-500/30 p-3 text-rose-300 text-sm flex items-center space-x-2">
               <span className="text-rose-400">⚠</span>
               <span>{error}</span>
             </div>
+          )}
+
+          {/* Turnstile invisible widget container */}
+          {captchaSiteKey && turnstileRef && (
+            <div ref={turnstileRef} />
           )}
 
           <div className="space-y-2">
@@ -203,27 +245,6 @@ function RegisterPageContent() {
             </div>
           </div>
 
-          {captcha && (
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                Security Question
-              </label>
-              <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700">
-                <Mail className="w-4 h-4 text-cyan-400" />
-                <span className="text-sm text-slate-300">{captcha.question}</span>
-                <input
-                  type="text"
-                  value={captchaAnswer}
-                  onChange={(e) => setCaptchaAnswer(e.target.value)}
-                  placeholder="Answer"
-                  className="w-20 text-center text-xs font-mono text-cyan-300 bg-transparent border-none focus:ring-0"
-                  maxLength={2}
-                  autoComplete="off"
-                />
-              </div>
-            </div>
-          )}
-
           <button
             type="submit"
             disabled={isSubmitting}
@@ -233,6 +254,20 @@ function RegisterPageContent() {
             <span>{isSubmitting ? "Creating Account..." : "Enter the Sanctuary"}</span>
           </button>
         </form>
+
+        <div className="mt-6 flex items-center justify-center space-x-3">
+          <div className="w-full h-[1px] bg-slate-800" />
+          <span className="px-2 text-xs text-slate-500">Or continue with</span>
+          <div className="w-full h-[1px] bg-slate-800" />
+        </div>
+
+        <button
+          onClick={handleGoogleSignIn}
+          className="w-full py-3.5 rounded-xl border border-slate-600 bg-slate-900/50 text-slate-300 font-semibold text-sm flex items-center justify-center space-x-2 hover:bg-slate-800 hover:border-cyan-500/50 hover:text-white transition-all"
+        >
+          <Lock className="w-5 h-5" />
+          <span>Continue with Google</span>
+        </button>
 
         <div className="mt-6 text-center">
           <p className="text-xs text-slate-500">

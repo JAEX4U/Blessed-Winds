@@ -6,13 +6,28 @@ import {
   hashPassword,
   createSessionToken,
   setSessionCookie,
-  verifyCaptchaCookie,
 } from "@/lib/auth";
+
+async function verifyTurnstile(token: string): Promise<boolean> {
+  const verifyResponse = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        secret: process.env.TURNSTILE_SECRET_KEY!,
+        response: token,
+      }),
+    }
+  );
+  const result = await verifyResponse.json();
+  return result.success === true;
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { username, email, password, captchaAnswer } = body;
+    const { username, email, password, turnstileToken } = body;
 
     // Validate required fields
     if (!username || !email || !password) {
@@ -29,9 +44,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify captcha (cookie-based, works across serverless instances)
-    const answer = parseInt(String(captchaAnswer), 10);
-    if (isNaN(answer) || !(await verifyCaptchaCookie(answer))) {
+    // Verify Turnstile captcha
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: "Captcha verification required" },
+        { status: 400 }
+      );
+    }
+
+    if (!(await verifyTurnstile(turnstileToken))) {
       return NextResponse.json(
         { error: "Invalid or expired captcha" },
         { status: 400 }
