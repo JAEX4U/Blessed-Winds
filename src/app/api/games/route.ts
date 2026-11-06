@@ -3,10 +3,23 @@ import { db } from "@/db";
 import { users, gameSessions, windTransactions, userQuests } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { ensureDefaultUser } from "@/lib/seed";
+import { getSessionCookie, verifySessionToken } from "@/lib/auth";
+
+async function getCurrentUser(request: Request) {
+  const token = await getSessionCookie();
+  if (token) {
+    const payload = verifySessionToken(token);
+    if (payload) {
+      const [user] = await db.select().from(users).where(eq(users.id, payload.userId)).limit(1);
+      if (user) return user;
+    }
+  }
+  return ensureDefaultUser();
+}
 
 export async function POST(request: Request) {
   try {
-    const user = await ensureDefaultUser();
+    const user = await getCurrentUser(request);
     const body = await request.json();
     const { gameType, bet = 0, action, score = 0, clientData } = body;
 
@@ -91,13 +104,13 @@ export async function POST(request: Request) {
       ];
 
       const paidSegments = [
-        { payout: 0, label: "Calm Breeze (0)", weight: 15 },
+        { payout: 0, label: "Calm Breeze (0)", weight: 19 },
         { payout: 50, label: "Gentle Breeze (50)", weight: 20 },
         { payout: 100, label: "Brisk Draft (100)", weight: 22 },
         { payout: 200, label: "Gale Gust (200)", weight: 18 },
         { payout: 500, label: "Storm Surge (500)", weight: 12 },
         { payout: 800, label: "Typhoon Blessing (800)", weight: 8 },
-        { payout: 3000, label: "BLESSED HURRICANE (3000)!", weight: 5 },
+        { payout: 3000, label: "BLESSED HURRICANE (3000)!", weight: 1 },
       ];
 
       const segments = isPaid ? paidSegments : freeSegments;

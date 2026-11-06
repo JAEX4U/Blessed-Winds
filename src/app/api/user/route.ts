@@ -3,10 +3,25 @@ import { db } from "@/db";
 import { users, userInventory, shopItems, userQuests, windTransactions, gameSessions } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { ensureDefaultUser } from "@/lib/seed";
+import { getSessionCookie, verifySessionToken } from "@/lib/auth";
 
-export async function GET() {
+async function getCurrentUser(request: Request) {
+  const token = await getSessionCookie();
+  if (token) {
+    const payload = verifySessionToken(token);
+    if (payload) {
+      const [user] = await db.select().from(users).where(eq(users.id, payload.userId)).limit(1);
+      if (user) return { user, authenticated: true };
+    }
+  }
+  // Fall back to default user for unauthenticated access
+  const defaultUser = await ensureDefaultUser();
+  return { user: defaultUser, authenticated: false };
+}
+
+export async function GET(request: Request) {
   try {
-    const user = await ensureDefaultUser();
+    const { user, authenticated } = await getCurrentUser(request);
 
     // Fetch user inventory with item details
     const inventory = await db
@@ -52,6 +67,7 @@ export async function GET() {
 
     return NextResponse.json({
       user,
+      authenticated,
       inventory,
       quests,
       transactions,
@@ -65,7 +81,7 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const user = await ensureDefaultUser();
+    const { user } = await getCurrentUser(request);
     const body = await request.json();
 
     const { displayName, avatarUrl, bio, title, equippedBadge, equippedAura } = body;

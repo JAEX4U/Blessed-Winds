@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { useUser } from "@/context/UserContext";
+import { useRouter } from "next/navigation";
 import type { TabId } from "@/context/UserContext";
 import {
   Wind,
@@ -19,16 +20,25 @@ import {
   VolumeX,
   Trophy,
   Flame,
+  LogOut,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
 export default function Header() {
-  const { user, activeTab, setActiveTab, claimDailyBlessing } = useUser();
+  const { user, isAuthenticated, activeTab, setActiveTab, claimDailyBlessing, logout } = useUser();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dailyStatus, setDailyStatus] = useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const lastConfettiRef = useRef(0);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+  };
 
   const handleDailyClick = async () => {
     setIsClaiming(true);
@@ -115,60 +125,94 @@ export default function Header() {
             })}
           </nav>
 
-          {/* User Balances & Quick Daily Blessing */}
+          {/* Auth / User Balances & Quick Daily Blessing */}
           <div className="hidden xl:flex items-center space-x-3">
-            {/* Winds Balance Pill */}
-            <div
-              onClick={() => setActiveTab("profile")}
-              className="group cursor-pointer flex items-center space-x-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-950/70 to-slate-900/90 border border-cyan-500/30 hover:border-cyan-400 transition-all shadow-sm"
-              title="Your Blessed Winds Balance - Click to View Profile"
-            >
-              <div className="p-1 rounded-lg bg-cyan-500/20 text-cyan-400">
-                <Wind className="w-4 h-4 animate-spin" style={{ animationDuration: "8s" }} />
-              </div>
-                <div className="text-left">
-                <div className="text-[10px] text-cyan-300/70 font-semibold uppercase tracking-wider">
-                  Balance
+            {!user || !isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    router.push("/login");
+                  }}
+                  className="px-3.5 py-2 rounded-xl border border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/10 hover:text-white transition-all flex items-center space-x-1.5 text-sm font-semibold"
+                >
+                  <LogIn className="w-4 h-4" /> Sign In
+                </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    router.push("/register");
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center space-x-1.5"
+                >
+                  <UserPlus className="w-4 h-4 fill-current" /> Create Account
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Winds Balance Pill */}
+                <div
+                  onClick={() => setActiveTab("profile")}
+                  className="group cursor-pointer flex items-center space-x-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-950/70 to-slate-900/90 border border-cyan-500/30 hover:border-cyan-400 transition-all shadow-sm"
+                  title="Your Blessed Winds Balance - Click to View Profile"
+                >
+                  <div className="p-1 rounded-lg bg-cyan-500/20 text-cyan-400">
+                    <Wind className="w-4 h-4 animate-spin" style={{ animationDuration: "8s" }} />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-[10px] text-cyan-300/70 font-semibold uppercase tracking-wider">
+                      Balance
+                    </div>
+                    <div className="text-sm font-extrabold text-cyan-200 flex items-center space-x-1">
+                      <span>{(user?.windBalance ?? 0).toLocaleString()}</span>
+                      <span className="text-[11px] text-cyan-400 font-bold">WND</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm font-extrabold text-cyan-200 flex items-center space-x-1">
-                  <span>{(user?.windBalance ?? 0).toLocaleString()}</span>
-                  <span className="text-[11px] text-cyan-400 font-bold">WND</span>
+
+                {/* Gems Balance */}
+                <div
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-purple-500/30"
+                  title="Celestial Sky Gems"
+                >
+                  <Gem className="w-4 h-4 text-purple-400" />
+                  <div className="text-xs font-bold text-purple-200">
+                    {user?.gemBalance ?? 0} <span className="text-[10px] text-purple-400">GEMS</span>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Gems Balance */}
-            <div
-              className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-purple-500/30"
-              title="Celestial Sky Gems"
-            >
-              <Gem className="w-4 h-4 text-purple-400" />
-              <div className="text-xs font-bold text-purple-200">
-                {user?.gemBalance ?? 0} <span className="text-[10px] text-purple-400">GEMS</span>
-              </div>
-            </div>
+                {/* Daily streak */}
+                <div
+                  className="flex items-center space-x-1.5 rounded-xl border border-amber-500/25 bg-slate-900/80 px-2.5 py-1.5"
+                  title={`Daily streak: ${user?.streakDays ?? 1} days`}
+                >
+                  <Flame className="h-4 w-4 text-amber-400" />
+                  <span className="text-xs font-bold text-amber-200 tabular-nums">
+                    {user?.streakDays ?? 1}d
+                  </span>
+                </div>
 
-            {/* Daily streak */}
-            <div
-              className="flex items-center space-x-1.5 rounded-xl border border-amber-500/25 bg-slate-900/80 px-2.5 py-1.5"
-              title={`Daily streak: ${user?.streakDays ?? 1} days`}
-            >
-              <Flame className="h-4 w-4 text-amber-400" />
-              <span className="text-xs font-bold text-amber-200 tabular-nums">
-                {user?.streakDays ?? 1}d
-              </span>
-            </div>
+                {/* Daily Blessing Button */}
+                <button
+                  onClick={handleDailyClick}
+                  disabled={isClaiming}
+                  className="relative group overflow-hidden px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 text-slate-950 font-bold text-xs flex items-center space-x-1.5 shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                  title="Claim your Daily Blessed Winds"
+                >
+                  <Sparkles className="w-4 h-4 text-slate-950 fill-amber-300 animate-pulse" />
+                  <span>{isClaiming ? "Claiming..." : "Daily Gift"}</span>
+                </button>
 
-            {/* Daily Blessing Button */}
-            <button
-              onClick={handleDailyClick}
-              disabled={isClaiming}
-              className="relative group overflow-hidden px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 text-slate-950 font-bold text-xs flex items-center space-x-1.5 shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
-              title="Claim your Daily Blessed Winds"
-            >
-              <Sparkles className="w-4 h-4 text-slate-950 fill-amber-300 animate-pulse" />
-              <span>{isClaiming ? "Claiming..." : "Daily Gift"}</span>
-            </button>
+                {/* Sign Out */}
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900/80 text-slate-400 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30 transition-all text-xs font-semibold flex items-center space-x-1.5"
+                  title="Sign out"
+                >
+                  <LogOut className="w-4 h-4" /> Sign Out
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu trigger */}
@@ -200,57 +244,95 @@ export default function Header() {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-b border-sky-500/20 bg-slate-950/95 backdrop-blur-2xl px-4 pt-3 pb-6 space-y-3">
-          <div className="grid grid-cols-2 gap-2 p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-            <div className="flex items-center space-x-2 p-2">
-              <Wind className="w-4 h-4 text-cyan-400" />
-              <div>
-                <div className="text-[10px] text-slate-400">Winds</div>
-                <div className="text-xs font-bold text-cyan-200">{(user?.windBalance ?? 0).toLocaleString()}</div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2 p-2">
-              <Gem className="w-4 h-4 text-purple-400" />
-              <div>
-                <div className="text-[10px] text-slate-400">Sky Gems</div>
-                <div className="text-xs font-bold text-purple-200">{user?.gemBalance ?? 0}</div>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => {
-              handleDailyClick();
-              setMobileMenuOpen(false);
-            }}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 text-slate-950 font-bold text-sm flex items-center justify-center space-x-2"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Daily Gift</span>
-          </button>
-
-          <div className="space-y-1 pt-2">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
+          {!user || !isAuthenticated ? (
+            <>
+              <div className="space-y-2 pt-2">
                 <button
-                  key={item.id}
                   onClick={() => {
-                    setActiveTab(item.id as TabId);
+                    router.push("/login");
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-left transition-colors ${
-                    isActive
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                      : "text-slate-300 hover:bg-slate-900"
-                  }`}
+                  className="w-full py-2.5 rounded-xl border border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/10 hover:text-white transition-all flex items-center justify-center space-x-2 text-sm font-semibold"
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
+                  <LogIn className="w-4 h-4" /> Sign In
                 </button>
-              );
-            })}
-          </div>
+                <button
+                  onClick={() => {
+                    router.push("/register");
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center space-x-2"
+                >
+                  <UserPlus className="w-4 h-4 fill-current" /> Create Account
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-2 p-2 rounded-xl bg-slate-900/90 border border-slate-800">
+                <div className="flex items-center space-x-2 p-2">
+                  <Wind className="w-4 h-4 text-cyan-400" />
+                  <div>
+                    <div className="text-[10px] text-slate-400">Winds</div>
+                    <div className="text-xs font-bold text-cyan-200">
+                      {(user?.windBalance ?? 0).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 p-2">
+                  <Gem className="w-4 h-4 text-purple-400" />
+                  <div>
+                    <div className="text-[10px] text-slate-400">Sky Gems</div>
+                    <div className="text-xs font-bold text-purple-200">
+                      {user?.gemBalance ?? 0}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  handleDailyClick();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 text-slate-950 font-bold text-sm flex items-center justify-center space-x-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Daily Gift</span>
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="w-full py-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 transition-all flex items-center justify-center space-x-2 text-sm font-semibold"
+              >
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+
+              <div className="space-y-1 pt-2">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id as TabId);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-left transition-colors ${
+                        isActive
+                          ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                          : "text-slate-300 hover:bg-slate-900"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       )}
     </header>

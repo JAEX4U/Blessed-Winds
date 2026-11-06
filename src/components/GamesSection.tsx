@@ -166,13 +166,13 @@ function WheelOfGales() {
   ];
 
   const paidSegments = [
-    { payout: 0, label: "0", color: "from-slate-700 to-slate-800", text: "Calm Breeze (0)", weight: 15 },
+    { payout: 0, label: "0", color: "from-slate-700 to-slate-800", text: "Calm Breeze (0)", weight: 19 },
     { payout: 50, label: "50", color: "from-sky-700 to-sky-900", text: "Gentle Breeze (50)", weight: 20 },
     { payout: 100, label: "100", color: "from-teal-600 to-teal-800", text: "Brisk Draft (100)", weight: 22 },
     { payout: 200, label: "200", color: "from-emerald-600 to-emerald-800", text: "Gale Gust (200)", weight: 18 },
     { payout: 500, label: "500", color: "from-cyan-600 to-blue-800", text: "Storm Surge (500)", weight: 12 },
     { payout: 800, label: "800", color: "from-purple-600 to-purple-900", text: "Typhoon Blessing (800)", weight: 8 },
-    { payout: 3000, label: "3000", color: "from-amber-500 to-yellow-600", text: "BLESSED HURRICANE (3000)!", weight: 5 },
+    { payout: 3000, label: "3000", color: "from-amber-500 to-yellow-600", text: "BLESSED HURRICANE (3000)!", weight: 1 },
   ];
 
   const segments = spinMode === "paid" ? paidSegments : freeSegments;

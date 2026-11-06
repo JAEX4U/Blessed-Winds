@@ -2,7 +2,9 @@ import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
+  username: text("username").unique(),
+  email: text("email").unique(),
+  passwordHash: text("password_hash"),
   displayName: text("display_name").notNull(),
   avatarUrl: text("avatar_url").default("🌪️"),
   windBalance: integer("wind_balance").notNull().default(1000),
@@ -19,6 +21,9 @@ export const users = pgTable("users", {
   wheelFreeSpinsUsed: integer("wheel_free_spins_used").notNull().default(0),
   wheelPaidSpinsUsed: integer("wheel_paid_spins_used").notNull().default(0),
   wheelSpinsDate: timestamp("wheel_spins_date"),
+  authProvider: text("auth_provider").default("credentials"), // 'credentials' | 'google'
+  emailVerified: boolean("email_verified").default(false),
+  isAnonymous: boolean("is_anonymous").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
